@@ -1,0 +1,3 @@
+[build]
+  command = "node execution/sync_sheets.js"
+  publish = "src"

@@ -1,0 +1,4 @@
+{
+  "buildCommand": "node execution/sync_sheets.js",
+  "outputDirectory": "src"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "painel-checklist-frota",
+  "version": "1.0.0",
+  "description": "Dashboard de Checklist da Frota de Veículos",
+  "main": "src/index.html",
+  "scripts": {
+    "build": "node execution/sync_sheets.js",
+    "sync": "node execution/sync_sheets.js",
+    "dev": "npx serve src",
+    "start": "npx serve src"
+  },
+  "keywords": ["dashboard", "checklist", "frota"],
+  "author": "",
+  "license": "ISC"
+}

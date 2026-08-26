@@ -1,4 +1,15 @@
 # Guia do Tutor (guide_tutor.md)
 
-- [x] Criação da estrutura base e 3-layer architecture (directives, execution, .tmp).
-- [ ] Definir o primeiro passo / diretiva.
+## Status Atual
+- [x] Criação da arquitetura em 3 camadas (`directives/`, `execution/`, `src/`).
+- [x] Design System e UI do Dashboard (HTML/CSS/JS puro, design premium e responsivo).
+- [x] Mapeamento dos 10 veículos da frota e 29 perguntas do checklist real.
+- [x] Integração de dados reais da planilha do Google Sheets (Abril a Agosto de 2026).
+- [x] Calendário com seleção de mês/dia e visualização compilada ou detalhada por dia.
+- [x] Cálculo e gráfico dinâmico de KM acumulado e no dia.
+- [x] Algoritmo de NLP para detecção de reincidência de relatos com similaridade de Jaccard.
+- [x] Ferramenta determinística de sincronização (`execution/sync_sheets.js`) e diretiva (`directives/sync_sheets.md`).
+- [x] Botão de sincronização ao vivo no header do dashboard.
+- [x] Configuração para deploy no Vercel (`vercel.json`) e Netlify (`netlify.toml`).
+- [x] Diretiva de publicação ([deploy_vercel_netlify.md](file:///c:/Users/ggsantos/Desktop/PROJETOS/Painel%20Checklist%20Frota/directives/deploy_vercel_netlify.md)).
+
