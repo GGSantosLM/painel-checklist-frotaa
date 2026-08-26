@@ -620,7 +620,7 @@ function renderCompiled(monthDays) {
     document.getElementById('kmSubtitle').textContent = `Total percorrido no mês (${dates.length} dias)`;
     charts.updateKmChart(kmLabels, kmValues);
 
-    document.getElementById('checklistMeta').textContent = `${dates.length} dias registrados`;
+    document.getElementById('checklistMeta').innerHTML = `<span>${dates.length} dias registrados</span>`;
     renderChecklistTable(questionOk, questionNok);
     renderComments(monthDays);
 }
@@ -643,7 +643,16 @@ function renderSingleDay(date, dayData, allMonthDays) {
     document.getElementById('kmSubtitle').textContent = `Leitura do dia · Percorrido até aqui: ${kmSum.toLocaleString('pt-BR')} km`;
     charts.updateKmChart(kmLabels, kmValues);
 
-    document.getElementById('checklistMeta').textContent = formatDateLong(date);
+    const driverName = dayData.driver ? dayData.driver.trim() : '';
+    const hasValidDriver = driverName && !['null', 'undefined', '-', ''].includes(driverName.toLowerCase());
+    const driverBadgeHtml = hasValidDriver 
+        ? `<span class="meta-driver-badge"><span class="material-icons-round">person</span> Motorista: <strong>${driverName}</strong></span>` 
+        : '';
+
+    document.getElementById('checklistMeta').innerHTML = `
+        <span>${formatDateLong(date)}</span>
+        ${driverBadgeHtml}
+    `;
     renderChecklistTableSingleDay(dayData.questions);
 
     const singleDayObj = {};
@@ -656,7 +665,7 @@ function renderEmpty() {
     charts.updateKmChart([], []);
     document.getElementById('kmValue').textContent = '—';
     document.getElementById('kmSubtitle').textContent = 'Nenhum dado neste mês';
-    document.getElementById('checklistMeta').textContent = '';
+    document.getElementById('checklistMeta').innerHTML = '';
     document.getElementById('checklistBody').innerHTML = `
         <tr><td colspan="4" class="empty-state" style="padding:40px">
             <span class="material-icons-round" style="font-size:32px;opacity:0.3">inbox</span>

@@ -792,9 +792,35 @@ button {
 
 /* Card header meta (right side) */
 .card-header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
     font-size: var(--font-size-sm);
     color: var(--clr-text-muted);
     font-weight: 500;
+}
+
+.meta-driver-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    background: var(--clr-primary-light);
+    color: var(--clr-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    border: 1px solid rgba(217, 119, 6, 0.2);
+    animation: fadeIn 0.25s ease forwards;
+}
+
+.meta-driver-badge .material-icons-round {
+    font-size: 15px;
+}
+
+.meta-driver-badge strong {
+    font-weight: 700;
+    color: var(--clr-text);
 }
 
 /* ============================
