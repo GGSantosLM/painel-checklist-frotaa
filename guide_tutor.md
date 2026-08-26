@@ -12,4 +12,6 @@
 - [x] Botão de sincronização ao vivo no header do dashboard.
 - [x] Configuração para deploy no Vercel (`vercel.json`) e Netlify (`netlify.toml`).
 - [x] Diretiva de publicação ([deploy_vercel_netlify.md](file:///c:/Users/ggsantos/Desktop/PROJETOS/Painel%20Checklist%20Frota/directives/deploy_vercel_netlify.md)).
+- [x] Automação de sincronização horária via GitHub Actions (`.github/workflows/sync.yml`).
+
 
