@@ -162,7 +162,7 @@ class ChartManager {
                             grid: { display: false },
                             ticks: {
                                 font: { family: 'Inter', size: 10 },
-                                color: '#9CA3AF',
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--clr-text-muted').trim() || '#9CA3AF',
                                 maxTicksLimit: 8
                             }
                         },

@@ -857,8 +857,41 @@ async function syncWithRemote() {
     }
 }
 
+// ─── THEME MANAGER ─────────────────────────
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const currentTheme = saved || (prefersDark ? 'dark' : 'light');
+    applyTheme(currentTheme);
+
+    const btn = document.getElementById('btnThemeToggle');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+            localStorage.setItem('theme', next);
+            if (charts) {
+                charts.destroyAll();
+                updateDashboard();
+            }
+        });
+    }
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const icon = document.getElementById('themeIcon');
+    if (icon) {
+        icon.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
+    }
+}
+
 // ─── INIT ──────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Theme
+    initTheme();
+
     // Parse real data from embedded CSV
     state.data = parseCSV(RAW_CSV);
 

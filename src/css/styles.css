@@ -68,6 +68,38 @@
     --transition-slow: 400ms ease;
 }
 
+/* ---------- Dark Theme Tokens ---------- */
+[data-theme="dark"] {
+    --bg-page: #0B0F19;
+    --bg-card: #161F30;
+    --bg-header: #111827;
+
+    --clr-primary: #6366F1;
+    --clr-primary-light: rgba(99, 102, 241, 0.2);
+    --clr-primary-dark: #4F46E5;
+
+    --clr-green: #34D399;
+    --clr-green-bg: rgba(52, 211, 153, 0.15);
+    --clr-red: #F87171;
+    --clr-red-bg: rgba(248, 113, 113, 0.15);
+    --clr-amber: #FBBF24;
+    --clr-amber-bg: rgba(251, 191, 36, 0.15);
+    --clr-purple: #A78BFA;
+    --clr-purple-bg: rgba(167, 139, 250, 0.15);
+    --clr-blue-bg: rgba(96, 165, 250, 0.15);
+
+    --clr-text: #F1F5F9;
+    --clr-text-secondary: #94A3B8;
+    --clr-text-muted: #64748B;
+    --clr-border: #263345;
+    --clr-border-light: #1E293B;
+
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3);
+    --shadow-header: 0 1px 3px rgba(0,0,0,0.4);
+}
+
 /* ---------- Reset & Base ---------- */
 *, *::before, *::after {
     margin: 0;
@@ -206,7 +238,8 @@ button {
     flex-shrink: 0;
 }
 
-.btn-sync {
+.btn-sync,
+.btn-theme-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -219,7 +252,8 @@ button {
     transition: all var(--transition-fast);
 }
 
-.btn-sync:hover {
+.btn-sync:hover,
+.btn-theme-toggle:hover {
     color: var(--clr-primary);
     border-color: var(--clr-primary);
     background: var(--clr-primary-light);
