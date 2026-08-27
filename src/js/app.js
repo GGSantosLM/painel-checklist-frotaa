@@ -691,12 +691,91 @@ function renderHome() {
         });
     });
 
+    // Init overall conformity month select
+    initOverallMonthSelect();
+
     // Render overall conformity chart
     renderOverallConformityChart();
     
     // Render driver absenteeism
     renderDriverAbsenteeism();
 }
+
+function initOverallMonthSelect() {
+    const select = document.getElementById('overallMonthSelect');
+    if (!select) return;
+
+    const months = new Set();
+    Object.values(state.data).forEach(vehicleData => {
+        Object.keys(vehicleData.days || {}).forEach(date => {
+            if (date.length >= 7) months.add(date.substring(0, 7));
+        });
+    });
+
+    const sortedMonths = Array.from(months).sort().reverse();
+    const monthNames = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    if (!state.overallMonth && sortedMonths.length > 0) {
+        state.overallMonth = sortedMonths[0];
+    }
+
+    let optionsHtml = `<option value="all">Todos os Meses</option>`;
+    sortedMonths.forEach(ym => {
+        const [y, m] = ym.split('-');
+        const label = `${monthNames[parseInt(m) - 1]} ${y}`;
+        optionsHtml += `<option value="${ym}">${label}</option>`;
+    });
+
+    select.innerHTML = optionsHtml;
+    select.value = state.overallMonth || 'all';
+
+    select.onchange = () => {
+        state.overallMonth = select.value;
+        renderOverallConformityChart();
+    };
+}
+
+function renderOverallConformityChart() {
+    const select = document.getElementById('overallMonthSelect');
+    const selectedMonth = select ? select.value : (state.overallMonth || 'all');
+    state.overallMonth = selectedMonth;
+
+    // Aggregate all vehicles' data by date
+    const dailyStats = {}; // date -> { ok, nok }
+
+    Object.values(state.data).forEach(vehicleData => {
+        Object.entries(vehicleData.days).forEach(([date, dayData]) => {
+            if (selectedMonth === 'all' || date.startsWith(selectedMonth)) {
+                if (!dailyStats[date]) dailyStats[date] = { ok: 0, nok: 0 };
+                Object.values(dayData.questions).forEach(v => {
+                    if (v === 'OK') dailyStats[date].ok++;
+                    else dailyStats[date].nok++;
+                });
+            }
+        });
+    });
+
+    const sortedDates = Object.keys(dailyStats).sort();
+    if (sortedDates.length === 0) {
+        charts.updateOverallConformityChart([], []);
+        return;
+    }
+
+    const labels = sortedDates.map(d => {
+        const [, m, day] = d.split('-');
+        return `${parseInt(day)} ${MONTH_NAMES_SHORT[parseInt(m) - 1]}`;
+    });
+    const values = sortedDates.map(d => {
+        const s = dailyStats[d];
+        const total = s.ok + s.nok;
+        return total > 0 ? parseFloat(((s.ok / total) * 100).toFixed(1)) : 0;
+    });
+
+    charts.updateOverallConformityChart(labels, values);
+};
 
 function renderDriverAbsenteeism() {
     const grid = document.getElementById('absenteeismGrid');
@@ -755,42 +834,6 @@ function renderDriverAbsenteeism() {
             </div>
         `;
     }).join('');
-}
-
-function renderOverallConformityChart() {
-    // Aggregate all vehicles' data by date
-    const dailyStats = {}; // date -> { ok, nok }
-
-    Object.values(state.data).forEach(vehicleData => {
-        Object.entries(vehicleData.days).forEach(([date, dayData]) => {
-            if (!dailyStats[date]) dailyStats[date] = { ok: 0, nok: 0 };
-            Object.values(dayData.questions).forEach(v => {
-                if (v === 'OK') dailyStats[date].ok++;
-                else dailyStats[date].nok++;
-            });
-        });
-    });
-
-    const sortedDates = Object.keys(dailyStats).sort();
-    if (sortedDates.length === 0) return;
-
-    const labels = sortedDates.map(d => {
-        const [, m, day] = d.split('-');
-        return `${parseInt(day)} ${MONTH_NAMES_SHORT[parseInt(m) - 1]}`;
-    });
-    const values = sortedDates.map(d => {
-        const s = dailyStats[d];
-        const total = s.ok + s.nok;
-        return total > 0 ? parseFloat(((s.ok / total) * 100).toFixed(1)) : 0;
-    });
-
-    // Update subtitle
-    const sub = document.getElementById('overallChartSubtitle');
-    if (sub) {
-        sub.textContent = `${sortedDates.length} dias registrados`;
-    }
-
-    charts.updateOverallConformityChart(labels, values);
 }
 
 function getActiveVehicleData() {
