@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual do Usuário — Painel Checklist Frota</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 18mm 15mm 18mm 15mm;
+            @bottom-right {
+                content: counter(page);
+                font-family: 'Inter', sans-serif;
+                font-size: 9pt;
+                color: #64748B;
+            }
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1E293B;
+            background-color: #FFFFFF;
+            font-size: 10pt;
+            line-height: 1.55;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+
+        .avoid-break {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* --- COVER PAGE --- */
+        .cover {
+            height: 100vh;
+            min-height: 240mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 20px;
+            page-break-after: always;
+            border-left: 6px solid #D97706;
+            background: linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 60%);
+        }
+
+        .cover-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: #FEF3C7;
+            color: #B45309;
+            font-weight: 700;
+            font-size: 9pt;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid #FDE68A;
+        }
+
+        .cover-main {
+            margin-top: 40px;
+        }
+
+        .cover-title {
+            font-size: 26pt;
+            font-weight: 800;
+            color: #0F172A;
+            line-height: 1.15;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .cover-title span {
+            color: #D97706;
+        }
+
+        .cover-subtitle {
+            font-size: 12pt;
+            color: #475569;
+            font-weight: 400;
+            max-width: 520px;
+            line-height: 1.4;
+            margin-bottom: 24px;
+        }
+
+        .cover-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 24px;
+            max-width: 550px;
+        }
+
+        .cover-feat-item {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            padding: 12px 14px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .cover-feat-item strong {
+            display: block;
+            font-size: 10pt;
+            color: #0F172A;
+            margin-bottom: 2px;
+        }
+
+        .cover-feat-item span {
+            font-size: 8.5pt;
+            color: #64748B;
+        }
+
+        .cover-footer {
+            border-top: 1px solid #E2E8F0;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 9pt;
+            color: #64748B;
+        }
+
+        .cover-footer strong {
+            color: #0F172A;
+        }
+
+        /* --- CONTENT STRUCTURE --- */
+        .header-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #F1F5F9;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 8.5pt;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .header-strip .brand {
+            color: #D97706;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 17pt;
+            font-weight: 800;
+            color: #0F172A;
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+
+        h2 {
+            font-size: 12pt;
+            font-weight: 700;
+            color: #0F172A;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #E2E8F0;
+            padding-bottom: 5px;
+        }
+
+        h2 .num {
+            background: #D97706;
+            color: #FFFFFF;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9.5pt;
+            font-weight: 800;
+        }
+
+        h3 {
+            font-size: 11pt;
+            font-weight: 700;
+            color: #1E293B;
+            margin-top: 14px;
+            margin-bottom: 6px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            color: #334155;
+            text-align: justify;
+        }
+
+        /* --- CARDS & CALLOUTS --- */
+        .callout {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-left: 4px solid #D97706;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 12px 0;
+            font-size: 9.5pt;
+        }
+
+        .callout.tip {
+            border-left-color: #10B981;
+            background: #F0FDF4;
+            border-color: #DCFCE7;
+        }
+
+        .callout.info {
+            border-left-color: #3B82F6;
+            background: #EFF6FF;
+            border-color: #DBEAFE;
+        }
+
+        .callout strong {
+            color: #0F172A;
+        }
+
+        /* --- GRID & STEPS --- */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        .step-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 12px 14px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .step-num {
+            display: inline-block;
+            background: #FEF3C7;
+            color: #B45309;
+            font-weight: 800;
+            font-size: 8pt;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .step-card h4 {
+            font-size: 10pt;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 4px;
+        }
+
+        .step-card p {
+            font-size: 9pt;
+            color: #475569;
+            margin-bottom: 0;
+        }
+
+        /* --- TABLES --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0 16px;
+            font-size: 9pt;
+        }
+
+        th {
+            background: #F1F5F9;
+            color: #0F172A;
+            text-align: left;
+            padding: 8px 10px;
+            font-weight: 700;
+            border: 1px solid #CBD5E1;
+            font-size: 8.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        td {
+            padding: 8px 10px;
+            border: 1px solid #E2E8F0;
+            color: #334155;
+        }
+
+        tr:nth-child(even) {
+            background: #F8FAFC;
+        }
+
+        /* --- BADGES & TAGS --- */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 8pt;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .badge-ok {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .badge-nok {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .badge-gold {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        /* --- SUMMARY BOX --- */
+        .summary-box {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+            color: #FFFFFF;
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin: 14px 0;
+        }
+
+        .summary-box h3 {
+            color: #FBBF24;
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+
+        .summary-box p {
+            color: #CBD5E1;
+            margin-bottom: 0;
+            font-size: 9.5pt;
+        }
+
+        ul, ol {
+            margin: 6px 0 10px 20px;
+            color: #334155;
+            font-size: 9.5pt;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== CAPA ==================== -->
+    <div class="cover">
+        <div class="cover-header">
+            <span class="cover-badge">Manual Operacional Oficial</span>
+            <span style="color:#94A3B8;font-size:9pt;">Grupo EFX · Gestão de Frotas</span>
+        </div>
+
+        <div class="cover-main">
+            <h1 class="cover-title">Painel de Gestão & <span>Checklist da Frota</span></h1>
+            <p class="cover-subtitle">Guia prático e ilustrado de navegação, leitura de métricas operacionais, filtros mensais e acompanhamento de manutenções preventivas.</p>
+
+            <div class="cover-features">
+                <div class="cover-feat-item">
+                    <strong>Navegação Intuitiva</strong>
+                    <span>Visão consolidada da frota e visão detalhada por veículo.</span>
+                </div>
+                <div class="cover-feat-item">
+                    <strong>Conformidade Geral</strong>
+                    <span>Seleção dinâmica de mês e histórico completo de respostas.</span>
+                </div>
+                <div class="cover-feat-item">
+                    <strong>Engajamento & KM</strong>
+                    <span>Monitoramento de preenchimento dos motoristas e odômetro.</span>
+                </div>
+                <div class="cover-feat-item">
+                    <strong>Detecção de Reincidência</strong>
+                    <span>Inteligência Artificial (NLP) para identificar falhas mecânicas repetidas.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="cover-footer">
+            <div>
+                <strong>Grupo EFX — Gestão Logística</strong><br>
+                <span>Painel Web Responsivo · Versão 2.0 (Agosto/2026)</span>
+            </div>
+            <div style="text-align:right;">
+                <span>Documentação para Líderes, Gestores e Operação</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PÁGINA 1: VISÃO GERAL ==================== -->
+    <div class="header-strip">
+        <span class="brand">Painel Checklist Frota</span>
+        <span>Seção 1 · Introdução & Cabeçalho</span>
+    </div>
+
+    <h1>1. Visão Geral da Plataforma</h1>
+    <p>O <strong>Painel Checklist Frota</strong> é uma aplicação web centralizada desenvolvida para acompanhar diariamente a conformidade, segurança mecânica, odômetro e relatos de avarias dos veículos do Grupo EFX (10 veículos, sendo modelos Fiorino e Iveco).</p>
+
+    <div class="summary-box">
+        <h3>Propósito e Benefícios Principais</h3>
+        <p>Garantir que nenhum veículo circule com inconformidades graves, monitorar o preenchimento diário dos formulários pelos motoristas e oferecer aos gestores filtros precisos por mês e data para tomada de decisão ágil.</p>
+    </div>
+
+    <h2><span class="num">1</span> Elementos do Cabeçalho Superior</h2>
+    <p>O topo da tela está sempre visível e oferece controles rápidos para toda a aplicação:</p>
+
+    <div class="grid-2">
+        <div class="step-card">
+            <span class="step-num">Tema</span>
+            <h4>Alternador de Modo Claro / Escuro</h4>
+            <p>Clique no ícone de <strong>lua / sol</strong> para alternar entre Dark e Light mode. A sua preferência é gravada automaticamente no navegador.</p>
+        </div>
+        <div class="step-card">
+            <span class="step-num">Sync</span>
+            <h4>Sincronização ao Vivo (Google Sheets)</h4>
+            <p>Clique no botão com ícone de <strong>sincronização</strong> para buscar as últimas respostas preenchidas no formulário sem precisar recarregar a página.</p>
+        </div>
+    </div>
+
+    <table class="avoid-break">
+        <thead>
+            <tr>
+                <th>Elemento</th>
+                <th>Ação / Função</th>
+                <th>Onde encontrar</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Logo EFX / Título</strong></td>
+                <td>Retorna à tela inicial da frota ao clicar</td>
+                <td>Canto superior esquerdo</td>
+            </tr>
+            <tr>
+                <td><strong>Alternador de Tema</strong></td>
+                <td>Alterna o contraste visual da aplicação (Claro/Escuro)</td>
+                <td>Canto superior direito</td>
+            </tr>
+            <tr>
+                <td><strong>Botão Atualizar (Sync)</strong></td>
+                <td>Puxa novos dados enviados pelos motoristas em tempo real</td>
+                <td>Canto superior direito</td>
+            </tr>
+            <tr>
+                <td><strong>Status da Frota</strong></td>
+                <td>Informa o total de veículos monitorados (10 veículos)</td>
+                <td>Canto superior direito</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- ==================== PÁGINA 2: TELA INICIAL (HOME) ==================== -->
+    <div class="page-break"></div>
+    <div class="header-strip">
+        <span class="brand">Painel Checklist Frota</span>
+        <span>Seção 2 · Tela Inicial (Home)</span>
+    </div>
+
+    <h1>2. Tela Inicial — Visão Geral da Frota</h1>
+    <p>Ao abrir o painel, o usuário acessa a <strong>Visão Geral da Frota</strong>, que compila o status de todos os veículos e o desempenho coletivo.</p>
+
+    <h2><span class="num">2</span> Grid de Cards dos Veículos</h2>
+    <p>Cada veículo possui um cartão individual contendo as seguintes informações:</p>
+    <ul>
+        <li><strong>Modelo e Placa:</strong> Identificação visual do veículo (ex: <code>FIORINO SUX8H84</code>, <code>IVECO FRG7C31</code>).</li>
+        <li><strong>Taxa de Conformidade:</strong> Percentual de itens aprovados nas vistorias.</li>
+        <li><strong>Status Visual:</strong> Indicadores coloridos (<span class="badge badge-ok">Excelente</span>, <span class="badge badge-gold">Bom</span>, <span class="badge badge-nok">Atenção</span>).</li>
+        <li><strong>Quilometragem Recente:</strong> Último KM registrado no odômetro.</li>
+        <li><strong>Acesso Direto:</strong> Ao clicar em qualquer cartão, o painel abre automaticamente a tela de detalhes daquele veículo específico.</li>
+    </ul>
+
+    <h2><span class="num">3</span> Gráfico: Conformidade Geral da Frota</h2>
+    <p>Exibe a curva diária de conformidade de toda a frota agrupada. Permite enxergar oscilações ao longo dos dias e meses.</p>
+
+    <div class="callout tip avoid-break">
+        <strong>Como selecionar o mês no gráfico de conformidade:</strong>
+        <br>No canto direito do cabeçalho do card, utilize o menu suspenso <code>[Todos os Meses]</code> para filtrar por <strong>Agosto 2026</strong>, <strong>Julho 2026</strong>, <strong>Junho 2026</strong>, <strong>Maio 2026</strong> ou <strong>Abril 2026</strong>. O gráfico redesenhará a curva mostrando exatamente a evolução diária do mês escolhido.
+    </div>
+
+    <h2><span class="num">4</span> Engajamento dos Motoristas (Absenteísmo)</h2>
+    <p>Abaixo do gráfico de evolução, o quadro de <strong>Engajamento dos Motoristas</strong> organiza os motoristas por mês, exibindo a quantidade de dias em que preencheram o checklist.</p>
+    <ul>
+        <li>Organizado em ordem decrescente (do motorista mais assíduo ao menor número de registros).</li>
+        <li>Ajuda a gestão a identificar esquecimentos ou ausência de vistorias preventivas.</li>
+    </ul>
+
+    <!-- ==================== PÁGINA 3: DASHBOARD DO VEÍCULO ==================== -->
+    <div class="page-break"></div>
+    <div class="header-strip">
+        <span class="brand">Painel Checklist Frota</span>
+        <span>Seção 3 · Dashboard Individual do Veículo</span>
+    </div>
+
+    <h1>3. Painel Individual do Veículo</h1>
+    <p>Quando uma placa é selecionada, o painel entra no modo de auditoria detalhada do veículo.</p>
+
+    <h2><span class="num">5</span> Seletor de Placas (Abas Superiores)</h2>
+    <p>Uma barra horizontal de botões permite navegar instantaneamente entre as 10 placas da frota (SUX8H84, SUE7D02, SVJ3H89, SUW7B16, STA0F48, FRG7C31, FPF8A23, FXI0C35, ECF3235, FJF7817).</p>
+
+    <h2><span class="num">6</span> Calendário Interativo</h2>
+    <div class="grid-2 avoid-break">
+        <div class="step-card">
+            <span class="step-num">Modo Compilado</span>
+            <h4>Ver Compilado do Mês</h4>
+            <p>Clique no botão <strong>"Ver compilado do mês"</strong> para somar todas as vistorias do mês atual e ver a média acumulada do veículo.</p>
+        </div>
+        <div class="step-card">
+            <span class="step-num">Modo Dia a Dia</span>
+            <h4>Clique em uma Data Específica</h4>
+            <p>Clique em um dia com ponto indicador para ver exatamente o que o motorista respondeu naquela data específica.</p>
+        </div>
+    </div>
+
+    <h2><span class="num">7</span> Card de Conformidade Geral da Frota (Rosca)</h2>
+    <p>O gráfico em formato de rosca exibe a proporção de itens <strong>OK (Verde)</strong> versus <strong>NOK (Vermelho)</strong>.</p>
+    <ul>
+        <li><strong>Seletor Dinâmico de Mês:</strong> Você pode escolher no topo do card se deseja ver o mês atual, meses anteriores ou o consolidado de todo o histórico da frota.</li>
+        <li><strong>Rodapé Informativo:</strong> Exibe o total de veículos e a quantidade total de vistorias computadas no período selecionado.</li>
+    </ul>
+
+    <h2><span class="num">8</span> Card de Quilometragem (KM)</h2>
+    <p>Monitora a evolução do odômetro do veículo selecionado:</p>
+    <ul>
+        <li><strong>Total percorrido no mês:</strong> No modo compilado, calcula o KM final menos o KM inicial do mês.</li>
+        <li><strong>Leitura do dia:</strong> No modo de dia específico, exibe o odômetro exato registrado e a quilometragem percorrida até aquela data.</li>
+        <li><strong>Gráfico de Linha:</strong> Curva de crescimento contínuo do odômetro ao longo dos dias.</li>
+    </ul>
+
+    <!-- ==================== PÁGINA 4: CHECKLIST, OBS & REINCIDÊNCIA ==================== -->
+    <div class="page-break"></div>
+    <div class="header-strip">
+        <span class="brand">Painel Checklist Frota</span>
+        <span>Seção 4 · Checklist, Relatos & Reincidência</span>
+    </div>
+
+    <h1>4. Detalhamento Técnico & Relatos</h1>
+
+    <h2><span class="num">9</span> Tabela de Checklist por Pergunta</h2>
+    <p>Apresenta a auditoria completa dos 29 itens de segurança e mecânica do veículo:</p>
+
+    <div class="callout info avoid-break">
+        <strong>Identificação do Motorista:</strong> Ao selecionar um dia específico no calendário, o cabeçalho da tabela exibe automaticamente o crachá com o <strong>Nome do Motorista</strong> responsável pelo checklist. Ao voltar para a visão compilada, o crachá é recolhido para manter o foco estatístico.
+    </div>
+
+    <table class="avoid-break">
+        <thead>
+            <tr>
+                <th>Modo de Exibição</th>
+                <th>Colunas Apresentadas</th>
+                <th>Significado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Compilado do Mês</strong></td>
+                <td>Pergunta · OK · NOK · Distribuição (%)</td>
+                <td>Soma de quantas vezes o item esteve OK ou NOK no mês, com barra de progresso visual.</td>
+            </tr>
+            <tr>
+                <td><strong>Dia Específico</strong></td>
+                <td>Pergunta · Status (<span class="badge badge-ok">OK</span> ou <span class="badge badge-nok">NOK</span>)</td>
+                <td>Avaliação exata daquele dia + nome do motorista no topo.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2><span class="num">10</span> Observações Registradas</h2>
+    <p>Exibe os comentários abertos digitados pelos motoristas ao final do formulário (ex: "farol queimado", "barulho na suspensão", "vazamento de óleo"), com data e motorista associado.</p>
+
+    <h2><span class="num">11</span> Alertas de Reincidência (NLP - Inteligência Artificial)</h2>
+    <p>O painel possui um algoritmo inteligente de Processamento de Linguagem Natural (NLP) que agrupa queixas semelhantes ao longo do tempo:</p>
+    <ul>
+        <li><strong>Detecção de Padrões:</strong> Identifica se o mesmo defeito foi relatado em dias diferentes, mesmo que escrito com palavras ligeiramente distintas.</li>
+        <li><strong>Grau de Similaridade:</strong> Exibe a porcentagem de correspondência do relato (ex: <em>"85% similar"</em>).</li>
+        <li><strong>Ação Preventiva:</strong> Permite à manutenção agir rapidamente em problemas crônicos antes que gerem paradas não planejadas.</li>
+    </ul>
+
+    <!-- ==================== PÁGINA 5: GUIA RÁPIDO & FAQ ==================== -->
+    <div class="page-break"></div>
+    <div class="header-strip">
+        <span class="brand">Painel Checklist Frota</span>
+        <span>Seção 5 · Guia Rápido & FAQ</span>
+    </div>
+
+    <h1>5. Guia Rápido de Uso & Perguntas Frequentes</h1>
+
+    <h2><span class="num">12</span> Passo a Passo Operacional</h2>
+    <ol>
+        <li><strong>Acesse o link do painel</strong> pelo navegador do computador ou celular.</li>
+        <li><strong>Verifique a Visão Geral</strong> para checar a taxa de conformidade da frota e os motoristas ativos.</li>
+        <li><strong>Filtre o Mês Desejado</strong> através do menu suspenso de meses no card de conformidade.</li>
+        <li><strong>Clique no Veículo</strong> que deseja auditar para abrir o painel detalhado.</li>
+        <li><strong>Navegue pelas Datas</strong> no calendário para conferir o checklist preenchido e quem foi o motorista.</li>
+        <li><strong>Analise os Alertas de Reincidência</strong> para abrir ordens de serviço preventivas na oficina.</li>
+    </ol>
+
+    <h2><span class="num">13</span> Perguntas Frequentes (FAQ)</h2>
+
+    <div class="step-card avoid-break" style="margin-bottom:10px;">
+        <h4>1. Com que frequência os dados são atualizados?</h4>
+        <p>A sincronização é automática de hora em hora via GitHub Actions. Para forçar a atualização imediata, basta clicar no botão <strong>Sync</strong> no cabeçalho superior.</p>
+    </div>
+
+    <div class="step-card avoid-break" style="margin-bottom:10px;">
+        <h4>2. O que significa uma conformidade abaixo de 95%?</h4>
+        <p>Indica que um ou mais itens foram assinalados como <span class="badge badge-nok">NOK</span>. Recomenda-se abrir a tabela de perguntas do veículo para verificar se é um item crítico (ex: freios, pneus) ou secundário.</p>
+    </div>
+
+    <div class="step-card avoid-break" style="margin-bottom:10px;">
+        <h4>3. O painel funciona sem internet (offline)?</h4>
+        <p>Sim. O painel possui um snapshot estático embutido com todas as vistorias registradas. Ao recuperar a conexão, o botão de sincronização baixa as novas entradas.</p>
+    </div>
+
+    <div class="callout tip avoid-break" style="margin-top:16px;">
+        <strong>Suporte e Gestão da Frota:</strong>
+        <br>Para dúvidas sobre preenchimento de formulários, manutenção preventiva/corretiva ou cadastro de novos veículos, entre em contato com a equipe de Gestão de Frotas do Grupo EFX.
+    </div>
+
+</body>
+</html>
