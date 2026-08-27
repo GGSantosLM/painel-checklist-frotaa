@@ -1145,7 +1145,8 @@ button {
    HOME SCREEN
    ============================ */
 .home-screen {
-    max-width: 1440px;
+    max-width: 1800px;
+    width: 100%;
     margin: 0 auto;
     padding: var(--space-lg);
     animation: fadeInUp 0.4s ease;
@@ -1479,4 +1480,58 @@ button {
     .vehicle-card {
         padding: var(--space-sm);
     }
+}
+
+/* ============================
+   ABSENTEEISM CARD
+   ============================ */
+.absenteeism-card {
+    margin-top: 0;
+}
+.absenteeism-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--clr-text-muted);
+}
+.absenteeism-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+    margin-top: var(--space-sm);
+}
+.absent-month-group {
+    background: var(--bg-card);
+    border: 1px solid var(--clr-border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+}
+.absent-month-title {
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--clr-primary);
+    margin-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--clr-border-light);
+    padding-bottom: 4px;
+}
+.absent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.absent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-sm);
+}
+.absent-driver {
+    color: var(--clr-text);
+    font-weight: 500;
+}
+.absent-count {
+    background: var(--clr-border-light);
+    color: var(--clr-text-secondary);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
 }

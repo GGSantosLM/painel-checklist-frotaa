@@ -684,6 +684,68 @@ function renderHome() {
 
     // Render overall conformity chart
     renderOverallConformityChart();
+    
+    // Render driver absenteeism
+    renderDriverAbsenteeism();
+}
+
+function renderDriverAbsenteeism() {
+    const grid = document.getElementById('absenteeismGrid');
+    if (!grid) return;
+
+    // Aggregate submissions by month and driver
+    // monthKey (e.g. "2026-05") -> driver -> count
+    const stats = {};
+
+    Object.values(state.data).forEach(vehicleData => {
+        Object.entries(vehicleData.days).forEach(([date, dayData]) => {
+            if (!dayData.driver) return; // Skip if no driver info
+            const driver = dayData.driver.trim();
+            if (!driver || driver.toLowerCase() === 'não informado' || driver === '—') return;
+
+            // date format: YYYY-MM-DD
+            const [y, m] = date.split('-');
+            const monthKey = `${y}-${m}`;
+
+            if (!stats[monthKey]) stats[monthKey] = {};
+            if (!stats[monthKey][driver]) stats[monthKey][driver] = 0;
+            
+            stats[monthKey][driver]++;
+        });
+    });
+
+    const sortedMonths = Object.keys(stats).sort((a, b) => b.localeCompare(a)); // Newest first
+
+    if (sortedMonths.length === 0) {
+        grid.innerHTML = '<div style="color:var(--clr-text-muted)">Nenhum dado encontrado.</div>';
+        return;
+    }
+
+    grid.innerHTML = sortedMonths.map(monthKey => {
+        const [y, m] = monthKey.split('-');
+        const monthName = MONTH_NAMES_SHORT[parseInt(m) - 1];
+        const title = `${monthName} ${y}`;
+        
+        // Sort drivers by count descending
+        const drivers = Object.entries(stats[monthKey])
+            .sort((a, b) => b[1] - a[1]);
+
+        const listHtml = drivers.map(([drv, count]) => `
+            <div class="absent-item">
+                <span class="absent-driver">${drv}</span>
+                <span class="absent-count" title="${count} dias alimentou o formulário">${count} dias</span>
+            </div>
+        `).join('');
+
+        return `
+            <div class="absent-month-group">
+                <div class="absent-month-title">${title}</div>
+                <div class="absent-list">
+                    ${listHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 function renderOverallConformityChart() {
