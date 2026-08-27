@@ -8,6 +8,7 @@ class ChartManager {
     constructor() {
         this.conformityChart = null;
         this.kmChart = null;
+        this.overallConformityChart = null;
     }
 
     /* ---------- Conformity Donut ---------- */
@@ -184,7 +185,106 @@ class ChartManager {
         }
     }
 
-    /** Destroy all charts (used when switching vehicles) */
+    /* ---------- Overall Fleet Conformity Line Chart ---------- */
+
+    /**
+     * Create or update the overall fleet conformity chart on the Home screen.
+     * @param {string[]} labels  - date labels (e.g. ['01 Mai', '02 Mai'])
+     * @param {number[]} values  - conformity % per day
+     */
+    updateOverallConformityChart(labels, values) {
+        const ctx = document.getElementById('overallConformityChart');
+        if (!ctx) return;
+
+        const greenClr = getComputedStyle(document.documentElement)
+            .getPropertyValue('--clr-green').trim();
+        const amberClr = getComputedStyle(document.documentElement)
+            .getPropertyValue('--clr-amber').trim();
+
+        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, greenClr + '30');
+        gradient.addColorStop(1, greenClr + '05');
+
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Conformidade %',
+                data: values,
+                fill: true,
+                backgroundColor: gradient,
+                borderColor: greenClr,
+                borderWidth: 2.5,
+                pointRadius: values.length > 30 ? 0 : 3,
+                pointHoverRadius: 5,
+                pointBackgroundColor: greenClr,
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: greenClr,
+                pointHoverBorderWidth: 2,
+                tension: 0.35
+            }]
+        };
+
+        if (this.overallConformityChart) {
+            this.overallConformityChart.data = data;
+            this.overallConformityChart.update('active');
+        } else {
+            this.overallConformityChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1F2937',
+                            titleFont: { family: 'Inter', size: 12 },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            cornerRadius: 8,
+                            padding: 10,
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.parsed.y.toFixed(1)}% conforme`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: 'Inter', size: 10 },
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--clr-text-muted').trim() || '#9CA3AF',
+                                maxTicksLimit: 12
+                            }
+                        },
+                        y: {
+                            display: true,
+                            min: 80,
+                            max: 100,
+                            grid: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--clr-border-light').trim() || '#F3F4F6',
+                            },
+                            ticks: {
+                                font: { family: 'Inter', size: 10 },
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--clr-text-muted').trim() || '#9CA3AF',
+                                callback: (v) => v + '%'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutQuart'
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            });
+        }
+    }
+
+    /** Destroy all charts (used when switching vehicles or screens) */
     destroyAll() {
         if (this.conformityChart) {
             this.conformityChart.destroy();
@@ -193,6 +293,10 @@ class ChartManager {
         if (this.kmChart) {
             this.kmChart.destroy();
             this.kmChart = null;
+        }
+        if (this.overallConformityChart) {
+            this.overallConformityChart.destroy();
+            this.overallConformityChart = null;
         }
     }
 }

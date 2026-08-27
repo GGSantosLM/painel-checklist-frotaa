@@ -350,6 +350,7 @@ const RAW_CSV = `Carimbo de data/hora,Modelo do Veículo,Placa do Veículo,KM At
 let state = {
     activeVehicle: 0,
     selectedDate: null,
+    screen: 'home',
     data: {}
 };
 
@@ -554,6 +555,171 @@ function renderTabs() {
             updateDashboard();
         });
     });
+}
+
+// ─── NAVIGATION ────────────────────────────
+function navigateTo(screen) {
+    state.screen = screen;
+    const homeEl = document.getElementById('homeScreen');
+    const dashEl = document.getElementById('dashboardScreen');
+    const tabsEl = document.getElementById('vehicleTabs');
+    const navHome = document.getElementById('navHome');
+    const navDash = document.getElementById('navDashboard');
+
+    if (screen === 'home') {
+        homeEl.style.display = '';
+        dashEl.style.display = 'none';
+        tabsEl.style.display = 'none';
+        navHome.classList.add('active');
+        navDash.classList.remove('active');
+        charts.destroyAll();
+        renderHome();
+    } else {
+        homeEl.style.display = 'none';
+        dashEl.style.display = '';
+        tabsEl.style.display = '';
+        navHome.classList.remove('active');
+        navDash.classList.add('active');
+        charts.destroyAll();
+        renderTabs();
+        updateDashboard();
+    }
+}
+
+// ─── HOME SCREEN ───────────────────────────
+const MONTH_NAMES_SHORT = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
+function computeVehicleConformity(vehicleDays) {
+    let totalOk = 0, totalNok = 0;
+    Object.values(vehicleDays).forEach(dayData => {
+        Object.values(dayData.questions).forEach(v => {
+            if (v === 'OK') totalOk++; else totalNok++;
+        });
+    });
+    const total = totalOk + totalNok;
+    return total > 0 ? Math.round((totalOk / total) * 100) : 0;
+}
+
+function computeLatestKm(vehicleDays) {
+    const dates = Object.keys(vehicleDays).sort();
+    if (dates.length === 0) return 0;
+    return vehicleDays[dates[dates.length - 1]].km || 0;
+}
+
+function getDriverHistory(vehicleDays) {
+    const entries = Object.entries(vehicleDays)
+        .sort((a, b) => b[0].localeCompare(a[0])) // reverse chronological
+        .slice(0, 15); // limit to last 15
+    return entries.map(([date, data]) => {
+        const [, m, d] = date.split('-');
+        return {
+            label: `${parseInt(d)} ${MONTH_NAMES_SHORT[parseInt(m) - 1]}`,
+            driver: data.driver || '—'
+        };
+    });
+}
+
+function getConformityColor(pct) {
+    if (pct >= 95) return 'var(--clr-green)';
+    if (pct >= 85) return 'var(--clr-amber)';
+    return 'var(--clr-red)';
+}
+
+function renderHome() {
+    const grid = document.getElementById('fleetGrid');
+    if (!grid) return;
+
+    grid.innerHTML = VEHICLES.map((v, idx) => {
+        const vehicleData = state.data[v.plate] || { days: {} };
+        const pct = computeVehicleConformity(vehicleData.days);
+        const km = computeLatestKm(vehicleData.days);
+        const driverHistory = getDriverHistory(vehicleData.days);
+        const color = getConformityColor(pct);
+
+        const tooltipItems = driverHistory.length > 0
+            ? driverHistory.map(d =>
+                `<div class="vehicle-card__tooltip-item">
+                    <span class="vehicle-card__tooltip-date">${d.label}</span>
+                    <span class="vehicle-card__tooltip-driver">${d.driver}</span>
+                </div>`
+            ).join('')
+            : '<div class="vehicle-card__tooltip-item" style="color:var(--clr-text-muted)">Sem registros</div>';
+
+        return `
+            <div class="vehicle-card" data-vehicle-index="${idx}">
+                <div class="vehicle-card__tooltip">
+                    <div class="vehicle-card__tooltip-title">Motoristas Recentes</div>
+                    <div class="vehicle-card__tooltip-list">${tooltipItems}</div>
+                </div>
+                <div class="vehicle-card__top">
+                    <span class="vehicle-card__plate">${v.plate}</span>
+                    <span class="vehicle-card__model">${v.model}</span>
+                </div>
+                <div class="vehicle-card__conformity">
+                    <span class="vehicle-card__pct" style="color:${color}">${pct}%</span>
+                    <span class="vehicle-card__pct-label">conforme</span>
+                </div>
+                <div class="vehicle-card__bar">
+                    <div class="vehicle-card__bar-fill" style="width:${pct}%;background:${color}"></div>
+                </div>
+                <div class="vehicle-card__km">
+                    <span class="material-icons-round vehicle-card__km-icon">speed</span>
+                    <span class="vehicle-card__km-value">${km > 0 ? km.toLocaleString('pt-BR') + ' km' : 'Sem registro'}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Card click → navigate to dashboard for that vehicle
+    grid.querySelectorAll('.vehicle-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            // Ignore if click was on tooltip area
+            if (e.target.closest('.vehicle-card__tooltip')) return;
+            const idx = parseInt(card.dataset.vehicleIndex);
+            state.activeVehicle = idx;
+            state.selectedDate = null;
+            navigateTo('dashboard');
+        });
+    });
+
+    // Render overall conformity chart
+    renderOverallConformityChart();
+}
+
+function renderOverallConformityChart() {
+    // Aggregate all vehicles' data by date
+    const dailyStats = {}; // date -> { ok, nok }
+
+    Object.values(state.data).forEach(vehicleData => {
+        Object.entries(vehicleData.days).forEach(([date, dayData]) => {
+            if (!dailyStats[date]) dailyStats[date] = { ok: 0, nok: 0 };
+            Object.values(dayData.questions).forEach(v => {
+                if (v === 'OK') dailyStats[date].ok++;
+                else dailyStats[date].nok++;
+            });
+        });
+    });
+
+    const sortedDates = Object.keys(dailyStats).sort();
+    if (sortedDates.length === 0) return;
+
+    const labels = sortedDates.map(d => {
+        const [, m, day] = d.split('-');
+        return `${parseInt(day)} ${MONTH_NAMES_SHORT[parseInt(m) - 1]}`;
+    });
+    const values = sortedDates.map(d => {
+        const s = dailyStats[d];
+        const total = s.ok + s.nok;
+        return total > 0 ? parseFloat(((s.ok / total) * 100).toFixed(1)) : 0;
+    });
+
+    // Update subtitle
+    const sub = document.getElementById('overallChartSubtitle');
+    if (sub) {
+        sub.textContent = `${sortedDates.length} dias registrados`;
+    }
+
+    charts.updateOverallConformityChart(labels, values);
 }
 
 function getActiveVehicleData() {
@@ -910,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Determine initial month based on available data
     const initialMonth = findLatestMonthWithData(state.data);
 
-    // Init calendar
+    // Init calendar (needed for dashboard, set up now)
     calendar = new CalendarComponent({
         containerId: 'calendarGrid',
         monthLabelId: 'currentMonthLabel',
@@ -933,15 +1099,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup sync button
     const btnSync = document.getElementById('btnSync');
     if (btnSync) {
-        btnSync.addEventListener('click', syncWithRemote);
+        btnSync.addEventListener('click', async () => {
+            await syncWithRemote();
+            // Re-render current screen after sync
+            if (state.screen === 'home') {
+                charts.destroyAll();
+                renderHome();
+            }
+        });
     }
+
+    // Setup navigation buttons
+    const navHome = document.getElementById('navHome');
+    const navDash = document.getElementById('navDashboard');
+    if (navHome) navHome.addEventListener('click', () => navigateTo('home'));
+    if (navDash) navDash.addEventListener('click', () => navigateTo('dashboard'));
 
     // Try remote sync in background if online
     if (window.location.protocol.startsWith('http')) {
-        syncWithRemote();
+        syncWithRemote().then(() => {
+            if (state.screen === 'home') {
+                charts.destroyAll();
+                renderHome();
+            }
+        });
     }
 
-    // Render tabs and dashboard
-    renderTabs();
-    updateDashboard();
+    // Start on Home screen
+    renderHome();
 });
