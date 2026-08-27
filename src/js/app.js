@@ -1294,11 +1294,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Setup navigation buttons
+    // Setup navigation buttons & clickable logos
     const navHome = document.getElementById('navHome');
     const navDash = document.getElementById('navDashboard');
+    const headerBrand = document.getElementById('headerBrand') || document.querySelector('.header-left');
+    const headerLogoEfx = document.getElementById('headerLogoEfx') || document.querySelector('.header-logo-wrapper');
+
     if (navHome) navHome.addEventListener('click', () => navigateTo('home'));
     if (navDash) navDash.addEventListener('click', () => navigateTo('dashboard'));
+
+    if (headerBrand) {
+        headerBrand.addEventListener('click', () => navigateTo('home'));
+        headerBrand.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigateTo('home');
+            }
+        });
+    }
+
+    if (headerLogoEfx) {
+        headerLogoEfx.addEventListener('click', () => navigateTo('home'));
+        headerLogoEfx.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                navigateTo('home');
+            }
+        });
+    }
 
     // Try remote sync in background if online
     if (window.location.protocol.startsWith('http')) {

@@ -168,6 +168,14 @@ button {
     align-items: center;
     gap: var(--space-sm);
     flex-shrink: 0;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.header-left:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
 }
 
 .logo-icon {
@@ -344,6 +352,13 @@ button {
     padding-left: var(--space-sm);
     border-left: 1px solid var(--clr-border);
     margin-left: 2px;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity var(--transition-fast);
+}
+
+.header-logo-wrapper:hover {
+    opacity: 0.85;
 }
 
 .header-logo-efx {
@@ -355,6 +370,7 @@ button {
     transition: transform var(--transition-fast);
 }
 
+.header-logo-wrapper:hover .header-logo-efx,
 .header-logo-efx:hover {
     transform: scale(1.04);
 }
