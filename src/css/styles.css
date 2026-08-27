@@ -649,6 +649,61 @@ button {
     color: var(--clr-text);
 }
 
+.conformity-footer {
+    text-align: center;
+    margin-top: var(--space-sm);
+    font-size: var(--font-size-xs);
+    color: var(--clr-text-muted);
+    font-weight: 500;
+}
+
+.card-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.select-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.conformity-month-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: var(--clr-border-light);
+    color: var(--clr-text);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-sm);
+    padding: 5px 26px 5px 10px;
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.conformity-month-select:hover {
+    border-color: var(--clr-primary);
+    background: var(--bg-card);
+}
+
+.conformity-month-select:focus {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 2px var(--clr-primary-light);
+}
+
+.select-wrapper .select-arrow {
+    position: absolute;
+    right: 6px;
+    pointer-events: none;
+    font-size: 16px;
+    color: var(--clr-text-muted);
+}
+
 /* ============================
    KM CARD
    ============================ */

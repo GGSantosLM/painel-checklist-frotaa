@@ -348,9 +348,10 @@ const RAW_CSV = `Carimbo de data/hora,Modelo do Veículo,Placa do Veículo,KM At
 
 // ─── STATE ─────────────────────────────────
 let state = {
+    screen: 'home',
     activeVehicle: 0,
     selectedDate: null,
-    screen: 'home',
+    conformityMonth: 'all',
     data: {}
 };
 
@@ -809,12 +810,88 @@ function getFilteredDays(vehicleData) {
     return filtered;
 }
 
+function initConformityMonthSelect() {
+    const select = document.getElementById('conformityMonthSelect');
+    if (!select) return;
+
+    // Extract unique YYYY-MM
+    const months = new Set();
+    Object.values(state.data).forEach(vehicle => {
+        Object.keys(vehicle.days || {}).forEach(date => {
+            if (date.length >= 7) {
+                months.add(date.substring(0, 7));
+            }
+        });
+    });
+
+    const sortedMonths = Array.from(months).sort().reverse();
+    const monthNames = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+
+    if (!state.conformityMonth && sortedMonths.length > 0) {
+        state.conformityMonth = sortedMonths[0];
+    }
+
+    let optionsHtml = `<option value="all">Todos os Meses</option>`;
+    sortedMonths.forEach(ym => {
+        const [y, m] = ym.split('-');
+        const label = `${monthNames[parseInt(m) - 1]} ${y}`;
+        optionsHtml += `<option value="${ym}">${label}</option>`;
+    });
+
+    select.innerHTML = optionsHtml;
+    select.value = state.conformityMonth || 'all';
+
+    select.onchange = () => {
+        state.conformityMonth = select.value;
+        updateFleetConformity();
+    };
+}
+
+function updateFleetConformity() {
+    const select = document.getElementById('conformityMonthSelect');
+    const selectedMonth = select ? select.value : (state.conformityMonth || 'all');
+    state.conformityMonth = selectedMonth;
+
+    let totalOk = 0;
+    let totalNok = 0;
+    let totalChecklists = 0;
+
+    Object.values(state.data).forEach(vehicle => {
+        Object.entries(vehicle.days || {}).forEach(([date, dayData]) => {
+            if (selectedMonth === 'all' || date.startsWith(selectedMonth)) {
+                totalChecklists++;
+                Object.values(dayData.questions || {}).forEach(val => {
+                    if (val === 'OK') totalOk++;
+                    else if (val === 'NOK') totalNok++;
+                });
+            }
+        });
+    });
+
+    charts.updateConformity(totalOk, totalNok);
+
+    const footer = document.getElementById('conformityFooter');
+    if (footer) {
+        const vehicleCount = Object.keys(state.data).length;
+        if (totalChecklists > 0) {
+            footer.textContent = `${vehicleCount} veículos · ${totalChecklists} vistorias`;
+        } else {
+            footer.textContent = 'Nenhuma vistoria registrada neste período';
+        }
+    }
+}
+
 function updateDashboard() {
     const vehicleData = getActiveVehicleData();
     const monthDays = getFilteredDays(vehicleData);
     const selectedDate = state.selectedDate;
 
     calendar.setDatesWithData(Object.keys(monthDays));
+
+    updateFleetConformity();
 
     if (selectedDate && monthDays[selectedDate]) {
         renderSingleDay(selectedDate, monthDays[selectedDate], monthDays);
@@ -832,20 +909,16 @@ function renderCompiled(monthDays) {
         return;
     }
 
-    let totalOk = 0;
-    let totalNok = 0;
     const questionOk = {};
     const questionNok = {};
     QUESTIONS.forEach(q => { questionOk[q] = 0; questionNok[q] = 0; });
 
     Object.values(monthDays).forEach(dayData => {
         Object.entries(dayData.questions).forEach(([q, val]) => {
-            if (val === 'OK') { totalOk++; questionOk[q]++; }
-            else { totalNok++; questionNok[q]++; }
+            if (val === 'OK') { questionOk[q]++; }
+            else { questionNok[q]++; }
         });
     });
-
-    charts.updateConformity(totalOk, totalNok);
 
     const sortedDates = dates.sort();
     const kmLabels = sortedDates.map(d => d.split('-')[2]);
@@ -862,13 +935,6 @@ function renderCompiled(monthDays) {
 }
 
 function renderSingleDay(date, dayData, allMonthDays) {
-    let ok = 0;
-    let nok = 0;
-    Object.values(dayData.questions).forEach(v => {
-        if (v === 'OK') ok++; else nok++;
-    });
-    charts.updateConformity(ok, nok);
-
     const sortedDates = Object.keys(allMonthDays).sort();
     const upToDates = sortedDates.filter(d => d <= date);
     const kmLabels = upToDates.map(d => d.split('-')[2]);
@@ -897,7 +963,6 @@ function renderSingleDay(date, dayData, allMonthDays) {
 }
 
 function renderEmpty() {
-    charts.updateConformity(0, 0);
     charts.updateKmChart([], []);
     document.getElementById('kmValue').textContent = '—';
     document.getElementById('kmSubtitle').textContent = 'Nenhum dado neste mês';
@@ -1094,6 +1159,7 @@ async function syncWithRemote() {
 
     if (fetchedCSV) {
         state.data = parseCSV(fetchedCSV);
+        initConformityMonthSelect();
         updateDashboard();
     }
 
@@ -1149,6 +1215,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Determine initial month based on available data
     const initialMonth = findLatestMonthWithData(state.data);
+    state.conformityMonth = `${initialMonth.year}-${String(initialMonth.month + 1).padStart(2, '0')}`;
+    initConformityMonthSelect();
 
     // Init calendar (needed for dashboard, set up now)
     calendar = new CalendarComponent({

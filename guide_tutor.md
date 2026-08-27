@@ -15,6 +15,7 @@
 - [x] Automação de sincronização horária via GitHub Actions (`.github/workflows/sync.yml`).
 - [x] Suporte a Tema Claro e Escuro (Dark/Light mode) com alternador no topo e persistência local.
 - [x] Exibição contextual do motorista ao selecionar o dia no checklist (e ocultação automática na visão compilada).
+- [x] Seletor dinâmico de mês no card "Conformidade Geral da Frota" com cálculo consolidado de toda a frota (mês a mês e visão geral).
 
 
 
