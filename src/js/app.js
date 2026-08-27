@@ -1048,7 +1048,11 @@ function initTheme() {
             localStorage.setItem('theme', next);
             if (charts) {
                 charts.destroyAll();
-                updateDashboard();
+                if (state.screen === 'home') {
+                    renderHome();
+                } else {
+                    updateDashboard();
+                }
             }
         });
     }
