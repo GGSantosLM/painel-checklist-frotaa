@@ -153,12 +153,14 @@ button {
 }
 
 .header-inner {
-    max-width: 1440px;
+    max-width: 1800px;
+    width: 100%;
     margin: 0 auto;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: var(--space-sm) var(--space-lg);
-    gap: var(--space-lg);
+    gap: var(--space-md);
 }
 
 .header-left {
@@ -180,45 +182,68 @@ button {
     white-space: nowrap;
 }
 
-/* Vehicle Tabs */
+/* Vehicle Tabs (Plates Selector) */
 .vehicle-tabs {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
     overflow-x: auto;
-    flex: 1;
-    padding: var(--space-xs) 0;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid var(--clr-border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: var(--clr-border) transparent;
 }
 
-.vehicle-tabs::-webkit-scrollbar { display: none; }
+.vehicle-tabs::-webkit-scrollbar {
+    height: 4px;
+}
+
+.vehicle-tabs::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vehicle-tabs::-webkit-scrollbar-thumb {
+    background: var(--clr-border);
+    border-radius: var(--radius-full);
+}
 
 .vehicle-tab {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 8px;
     padding: 8px 16px;
     border-radius: var(--radius-full);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    letter-spacing: 0.5px;
     white-space: nowrap;
     color: var(--clr-text-secondary);
-    background: transparent;
+    background: var(--clr-border-light);
     transition: all var(--transition-fast);
-    border: 1px solid transparent;
+    border: 1.5px solid transparent;
+    flex-shrink: 0;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .vehicle-tab:hover {
     background: var(--clr-primary-light);
     color: var(--clr-primary);
+    border-color: rgba(217, 119, 6, 0.3);
 }
 
 .vehicle-tab.active {
     background: var(--clr-primary);
     color: #FFFFFF;
     border-color: var(--clr-primary);
-    box-shadow: 0 2px 8px rgba(79, 107, 237, 0.3);
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35);
 }
 
 .vehicle-tab .tab-dot {
@@ -231,7 +256,23 @@ button {
 
 .vehicle-tab.active .tab-dot {
     background: #FFFFFF;
-    opacity: 0.8;
+    opacity: 1;
+}
+
+[data-theme="dark"] .vehicle-tab {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--clr-text-secondary);
+}
+
+[data-theme="dark"] .vehicle-tab:hover {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--clr-efx-gold);
+}
+
+[data-theme="dark"] .vehicle-tab.active {
+    background: var(--clr-primary);
+    color: #FFFFFF;
+    border-color: var(--clr-primary);
 }
 
 /* Header Right */
@@ -322,7 +363,8 @@ button {
    MAIN CONTENT
    ============================ */
 .main-content {
-    max-width: 1440px;
+    max-width: 1800px;
+    width: 100%;
     margin: 0 auto;
     padding: var(--space-lg);
     display: flex;
@@ -1062,18 +1104,39 @@ button {
     .bottom-row {
         grid-template-columns: 1fr;
     }
+}
+
+@media (max-width: 768px) {
     .header-inner {
-        flex-wrap: wrap;
+        padding: var(--space-xs) var(--space-md);
+        gap: var(--space-xs);
+    }
+    .header-logo-wrapper {
+        border-left: none;
+        padding-left: 0;
+        margin-left: 0;
+    }
+    .header-logo-efx {
+        height: 24px;
+        max-width: 80px;
+    }
+    .status-badge {
+        display: none;
     }
     .vehicle-tabs {
-        order: 3;
-        width: 100%;
+        padding: var(--space-xs) var(--space-sm);
+        gap: 6px;
+    }
+    .vehicle-tab {
+        padding: 7px 12px;
+        font-size: var(--font-size-sm);
     }
 }
 
 @media (max-width: 600px) {
     .main-content {
         padding: var(--space-md);
+        gap: var(--space-md);
     }
     .card-body {
         padding: var(--space-md);

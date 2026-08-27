@@ -536,6 +536,8 @@ function detectRecurrences(vehicleDays, threshold = 0.25) {
 
 function renderTabs() {
     const tabsContainer = document.getElementById('vehicleTabs');
+    if (!tabsContainer) return;
+
     tabsContainer.innerHTML = VEHICLES.map((v, i) => `
         <button class="vehicle-tab ${i === state.activeVehicle ? 'active' : ''}"
                 role="tab"
@@ -555,6 +557,12 @@ function renderTabs() {
             updateDashboard();
         });
     });
+
+    // Auto-scroll active tab into view for mobile convenience
+    const activeTab = tabsContainer.querySelector('.vehicle-tab.active');
+    if (activeTab) {
+        activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
 }
 
 // ─── NAVIGATION ────────────────────────────
