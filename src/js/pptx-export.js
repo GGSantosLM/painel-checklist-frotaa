@@ -434,27 +434,20 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats, logoImgData)
         radius: 0.06
     });
 
-    // Grupo EFX Logo Image (with fallback to text)
+    // Grupo EFX Logo Image (Transparent PNG, preserved 2.18:1 aspect ratio)
+    const logoH = 0.36;
+    const logoW = 0.78; // 0.36 * (488 / 224) ≈ 0.784 in
+    const logoX = 0.55;
+    const logoY = 0.23;
+
     if (logoImgData) {
-        if (theme.id === 'dark') {
-            slide.addShape(pres.ShapeType.roundRect, {
-                x: 0.52, y: 0.22, w: 1.36, h: 0.38,
-                fill: { color: 'FFFFFF' },
-                line: { color: '334155', width: 1 },
-                radius: 0.04
-            });
-            slide.addImage({
-                data: logoImgData,
-                x: 0.55, y: 0.24, w: 1.30, h: 0.34,
-                sizing: { type: 'contain', w: 1.30, h: 0.34 }
-            });
-        } else {
-            slide.addImage({
-                data: logoImgData,
-                x: 0.52, y: 0.22, w: 1.36, h: 0.38,
-                sizing: { type: 'contain', w: 1.36, h: 0.38 }
-            });
-        }
+        slide.addImage({
+            data: logoImgData,
+            x: logoX,
+            y: logoY,
+            w: logoW,
+            h: logoH
+        });
     } else {
         slide.addText("GRUPO EFX", {
             x: 0.55, y: 0.24, w: 1.5, h: 0.32,
@@ -465,7 +458,7 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats, logoImgData)
 
     // Title
     slide.addText(title, {
-        x: 2.05, y: 0.22, w: 5.25, h: 0.36,
+        x: logoX + logoW + 0.15, y: 0.22, w: 5.80, h: 0.36,
         fontSize: 13.5, fontFace: 'Inter',
         color: theme.textPrimary, bold: true
     });
