@@ -936,73 +936,76 @@ function initConformityMonthSelect() {
     };
 }
 
-function updateFleetConformity() {
+function updateVehicleConformity(vehicleData, monthDays, selectedDate) {
+    const currentVehicle = VEHICLES[state.activeVehicle];
+    const plate = currentVehicle ? currentVehicle.plate : '';
+    
+    // Update card title to reflect active vehicle
+    const titleEl = document.querySelector('#conformityCard .card-title-group h2');
+    if (titleEl) {
+        titleEl.textContent = plate ? `Conformidade — ${plate}` : 'Conformidade';
+    }
+
+    // Sync select value to calendar month if select exists
     const select = document.getElementById('conformityMonthSelect');
     const calMonth = calendar ? calendar.getMonth() : null;
     const currentCalYm = calMonth ? `${calMonth.year}-${String(calMonth.month + 1).padStart(2, '0')}` : null;
+    if (select && currentCalYm && select.value !== currentCalYm && !selectedDate) {
+        if (Array.from(select.options).some(opt => opt.value === currentCalYm)) {
+            select.value = currentCalYm;
+            state.conformityMonth = currentCalYm;
+        }
+    }
 
-    let selectedMonth = select ? select.value : (state.conformityMonth || currentCalYm || 'all');
-    state.conformityMonth = selectedMonth;
-
-    let totalOk = 0;
-    let totalNok = 0;
-    let totalChecklists = 0;
-    let vehiclesWithChecklist = new Set();
-
-    const selectedDate = state.selectedDate;
+    const monthNames = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
 
     if (selectedDate) {
-        // === SINGLE DAY MODE ===
-        // Show only what was submitted on this selected day
-        Object.entries(state.data).forEach(([plate, vehicle]) => {
-            if (vehicle.days && vehicle.days[selectedDate]) {
-                const dayData = vehicle.days[selectedDate];
-                totalChecklists++;
-                vehiclesWithChecklist.add(plate);
-                Object.values(dayData.questions || {}).forEach(val => {
-                    if (val === 'OK') totalOk++;
-                    else if (val === 'NOK') totalNok++;
-                });
-            }
-        });
-
-        charts.updateConformity(totalOk, totalNok);
-
-        const footer = document.getElementById('conformityFooter');
-        if (footer) {
-            if (totalChecklists > 0) {
+        // === SINGLE DAY FOR SELECTED VEHICLE ===
+        const dayData = (vehicleData.days && vehicleData.days[selectedDate]) || null;
+        let dayOk = 0, dayNok = 0;
+        
+        if (dayData) {
+            Object.values(dayData.questions || {}).forEach(v => {
+                if (v === 'OK') dayOk++;
+                else if (v === 'NOK') dayNok++;
+            });
+            charts.updateConformity(dayOk, dayNok);
+            const footer = document.getElementById('conformityFooter');
+            if (footer) {
                 const [, m, d] = selectedDate.split('-');
-                footer.textContent = `${vehiclesWithChecklist.size} veículos · ${totalChecklists} vistorias em ${parseInt(d)}/${parseInt(m)}`;
-            } else {
-                footer.textContent = 'Nenhuma vistoria registrada nesta data';
+                footer.textContent = `Placa ${plate} · Vistoria em ${parseInt(d)}/${parseInt(m)}`;
+            }
+        } else {
+            charts.updateConformity(0, 0);
+            const footer = document.getElementById('conformityFooter');
+            if (footer) {
+                const [, m, d] = selectedDate.split('-');
+                footer.textContent = `Sem vistoria para ${plate} em ${parseInt(d)}/${parseInt(m)}`;
             }
         }
     } else {
-        // === COMPILED MONTH MODE ===
-        const filterMonth = selectedMonth === 'all' ? (currentCalYm || 'all') : selectedMonth;
+        // === COMPILED MONTH FOR SELECTED VEHICLE ===
+        let monthOk = 0, monthNok = 0;
+        const daysCount = Object.keys(monthDays).length;
 
-        Object.entries(state.data).forEach(([plate, vehicle]) => {
-            Object.entries(vehicle.days || {}).forEach(([date, dayData]) => {
-                if (filterMonth === 'all' || date.startsWith(filterMonth)) {
-                    totalChecklists++;
-                    vehiclesWithChecklist.add(plate);
-                    Object.values(dayData.questions || {}).forEach(val => {
-                        if (val === 'OK') totalOk++;
-                        else if (val === 'NOK') totalNok++;
-                    });
-                }
+        Object.values(monthDays).forEach(dayData => {
+            Object.values(dayData.questions || {}).forEach(v => {
+                if (v === 'OK') monthOk++;
+                else if (v === 'NOK') monthNok++;
             });
         });
 
-        charts.updateConformity(totalOk, totalNok);
+        charts.updateConformity(monthOk, monthNok);
 
         const footer = document.getElementById('conformityFooter');
         if (footer) {
-            const vehicleCount = Object.keys(state.data).length;
-            if (totalChecklists > 0) {
-                footer.textContent = `${vehicleCount} veículos · ${totalChecklists} vistorias`;
+            if (daysCount > 0 && calMonth) {
+                footer.textContent = `Placa ${plate} · ${daysCount} ${daysCount === 1 ? 'vistoria' : 'vistorias'} em ${monthNames[calMonth.month]} ${calMonth.year}`;
             } else {
-                footer.textContent = 'Nenhuma vistoria registrada neste período';
+                footer.textContent = `Nenhuma vistoria para ${plate} neste mês`;
             }
         }
     }
@@ -1015,7 +1018,7 @@ function updateDashboard() {
 
     calendar.setDatesWithData(Object.keys(monthDays));
 
-    updateFleetConformity();
+    updateVehicleConformity(vehicleData, monthDays, selectedDate);
 
     if (selectedDate && monthDays[selectedDate]) {
         renderSingleDay(selectedDate, monthDays[selectedDate], monthDays);
