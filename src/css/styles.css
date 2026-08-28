@@ -793,6 +793,23 @@ button {
     width: 200px;
 }
 
+.checklist-table.single-day-mode thead th.col-ok,
+.checklist-table.single-day-mode thead th.col-nok {
+    width: 120px;
+    text-align: center;
+}
+
+.checklist-table.single-day-mode tbody td.col-ok,
+.checklist-table.single-day-mode tbody td.col-nok {
+    width: 120px;
+    text-align: center;
+}
+
+.checklist-table.single-day-mode thead th.col-bar,
+.checklist-table.single-day-mode tbody td.col-bar {
+    display: none !important;
+}
+
 .checklist-table tbody tr {
     transition: background var(--transition-fast);
 }

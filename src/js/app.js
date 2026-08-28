@@ -927,40 +927,83 @@ function initConformityMonthSelect() {
 
     select.onchange = () => {
         state.conformityMonth = select.value;
-        updateFleetConformity();
+        if (select.value !== 'all' && calendar) {
+            const [y, m] = select.value.split('-');
+            calendar.goTo(parseInt(y), parseInt(m) - 1);
+            state.selectedDate = null;
+        }
+        updateDashboard();
     };
 }
 
 function updateFleetConformity() {
     const select = document.getElementById('conformityMonthSelect');
-    const selectedMonth = select ? select.value : (state.conformityMonth || 'all');
+    const calMonth = calendar ? calendar.getMonth() : null;
+    const currentCalYm = calMonth ? `${calMonth.year}-${String(calMonth.month + 1).padStart(2, '0')}` : null;
+
+    let selectedMonth = select ? select.value : (state.conformityMonth || currentCalYm || 'all');
     state.conformityMonth = selectedMonth;
 
     let totalOk = 0;
     let totalNok = 0;
     let totalChecklists = 0;
+    let vehiclesWithChecklist = new Set();
 
-    Object.values(state.data).forEach(vehicle => {
-        Object.entries(vehicle.days || {}).forEach(([date, dayData]) => {
-            if (selectedMonth === 'all' || date.startsWith(selectedMonth)) {
+    const selectedDate = state.selectedDate;
+
+    if (selectedDate) {
+        // === SINGLE DAY MODE ===
+        // Show only what was submitted on this selected day
+        Object.entries(state.data).forEach(([plate, vehicle]) => {
+            if (vehicle.days && vehicle.days[selectedDate]) {
+                const dayData = vehicle.days[selectedDate];
                 totalChecklists++;
+                vehiclesWithChecklist.add(plate);
                 Object.values(dayData.questions || {}).forEach(val => {
                     if (val === 'OK') totalOk++;
                     else if (val === 'NOK') totalNok++;
                 });
             }
         });
-    });
 
-    charts.updateConformity(totalOk, totalNok);
+        charts.updateConformity(totalOk, totalNok);
 
-    const footer = document.getElementById('conformityFooter');
-    if (footer) {
-        const vehicleCount = Object.keys(state.data).length;
-        if (totalChecklists > 0) {
-            footer.textContent = `${vehicleCount} veículos · ${totalChecklists} vistorias`;
-        } else {
-            footer.textContent = 'Nenhuma vistoria registrada neste período';
+        const footer = document.getElementById('conformityFooter');
+        if (footer) {
+            if (totalChecklists > 0) {
+                const [, m, d] = selectedDate.split('-');
+                footer.textContent = `${vehiclesWithChecklist.size} veículos · ${totalChecklists} vistorias em ${parseInt(d)}/${parseInt(m)}`;
+            } else {
+                footer.textContent = 'Nenhuma vistoria registrada nesta data';
+            }
+        }
+    } else {
+        // === COMPILED MONTH MODE ===
+        const filterMonth = selectedMonth === 'all' ? (currentCalYm || 'all') : selectedMonth;
+
+        Object.entries(state.data).forEach(([plate, vehicle]) => {
+            Object.entries(vehicle.days || {}).forEach(([date, dayData]) => {
+                if (filterMonth === 'all' || date.startsWith(filterMonth)) {
+                    totalChecklists++;
+                    vehiclesWithChecklist.add(plate);
+                    Object.values(dayData.questions || {}).forEach(val => {
+                        if (val === 'OK') totalOk++;
+                        else if (val === 'NOK') totalNok++;
+                    });
+                }
+            });
+        });
+
+        charts.updateConformity(totalOk, totalNok);
+
+        const footer = document.getElementById('conformityFooter');
+        if (footer) {
+            const vehicleCount = Object.keys(state.data).length;
+            if (totalChecklists > 0) {
+                footer.textContent = `${vehicleCount} veículos · ${totalChecklists} vistorias`;
+            } else {
+                footer.textContent = 'Nenhuma vistoria registrada neste período';
+            }
         }
     }
 }
@@ -1044,6 +1087,17 @@ function renderSingleDay(date, dayData, allMonthDays) {
 }
 
 function renderEmpty() {
+    const table = document.getElementById('checklistTable');
+    if (table) table.classList.remove('single-day-mode');
+    const thead = table ? table.querySelector('thead tr') : null;
+    if (thead) {
+        thead.innerHTML = `
+            <th class="col-question">Pergunta</th>
+            <th class="col-ok"><span class="badge badge-ok">OK</span></th>
+            <th class="col-nok"><span class="badge badge-nok">NOK</span></th>
+            <th class="col-bar">Distribuição</th>
+        `;
+    }
     charts.updateKmChart([], []);
     document.getElementById('kmValue').textContent = '—';
     document.getElementById('kmSubtitle').textContent = 'Nenhum dado neste mês';
@@ -1062,6 +1116,19 @@ function renderEmpty() {
 }
 
 function renderChecklistTable(questionOk, questionNok) {
+    const table = document.getElementById('checklistTable');
+    if (table) table.classList.remove('single-day-mode');
+
+    const thead = table ? table.querySelector('thead tr') : null;
+    if (thead) {
+        thead.innerHTML = `
+            <th class="col-question">Pergunta</th>
+            <th class="col-ok"><span class="badge badge-ok">OK</span></th>
+            <th class="col-nok"><span class="badge badge-nok">NOK</span></th>
+            <th class="col-bar">Distribuição</th>
+        `;
+    }
+
     const tbody = document.getElementById('checklistBody');
     tbody.innerHTML = QUESTIONS.map(q => {
         const ok = questionOk[q] || 0;
@@ -1086,19 +1153,46 @@ function renderChecklistTable(questionOk, questionNok) {
 }
 
 function renderChecklistTableSingleDay(questions) {
+    const table = document.getElementById('checklistTable');
+    if (table) table.classList.add('single-day-mode');
+
+    const thead = table ? table.querySelector('thead tr') : null;
+    if (thead) {
+        thead.innerHTML = `
+            <th class="col-question">Pergunta</th>
+            <th class="col-ok"><span class="badge badge-ok">OK</span></th>
+            <th class="col-nok"><span class="badge badge-nok">NOK</span></th>
+        `;
+    }
+
     const tbody = document.getElementById('checklistBody');
     tbody.innerHTML = QUESTIONS.map(q => {
         const val = questions[q] || '—';
         const isOk = val === 'OK';
+        const isNok = val === 'NOK';
+
+        let okCellHtml = '<span style="color:var(--clr-text-muted);opacity:0.25;font-weight:normal">—</span>';
+        let nokCellHtml = '<span style="color:var(--clr-text-muted);opacity:0.25;font-weight:normal">—</span>';
+
+        if (isOk) {
+            okCellHtml = `
+                <span class="status-indicator status-indicator--ok">
+                    <span class="material-icons-round">check_circle</span>
+                    OK
+                </span>`;
+        } else if (isNok) {
+            nokCellHtml = `
+                <span class="status-indicator status-indicator--nok">
+                    <span class="material-icons-round">cancel</span>
+                    NOK
+                </span>`;
+        }
+
         return `
             <tr>
                 <td class="col-question"><span class="question-text">${q}</span></td>
-                <td colspan="3" style="text-align:center">
-                    <span class="status-indicator ${isOk ? 'status-indicator--ok' : 'status-indicator--nok'}">
-                        <span class="material-icons-round">${isOk ? 'check_circle' : 'cancel'}</span>
-                        ${val}
-                    </span>
-                </td>
+                <td class="col-ok">${okCellHtml}</td>
+                <td class="col-nok">${nokCellHtml}</td>
             </tr>`;
     }).join('');
 }
