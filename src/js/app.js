@@ -630,7 +630,7 @@ function getDriverHistory(vehicleDays) {
 
 function getConformityColor(pct) {
     if (pct >= 95) return 'var(--clr-green)';
-    if (pct >= 85) return 'var(--clr-amber)';
+    if (pct >= 90) return 'var(--clr-amber)';
     return 'var(--clr-red)';
 }
 
