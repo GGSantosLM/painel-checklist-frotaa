@@ -155,15 +155,16 @@ function aggregateDataForMonths(data, monthsList) {
 
 /**
  * Generates an automated synthesized 3-line executive AI analysis
+ * Formatted cleanly to fit on a single line each without wrapping or repeating.
  */
 function generateExecutiveAnalysis(stats, periodTitle) {
     const { vehicleStats, fleetConformity, fleetTotal, driverList, nokQuestionsCount } = stats;
 
     if (fleetTotal === 0) {
         return [
-            `• Conformidade Geral: Sem registros de checklist suficientes no período de ${periodTitle}.`,
-            `• Pontos de Atenção: Nenhum apontamento mecânico registrado por ausência de vistorias.`,
-            `• Engajamento e Diretrizes: Necessário incentivar os condutores a realizarem o checklist diário da frota.`
+            `• Conformidade Geral: Sem checklists registrados no período de ${periodTitle}.`,
+            `• Pontos de Atenção: Nenhum apontamento mecânico identificado no ciclo.`,
+            `• Engajamento e Ações: Incentivar condutores na regularidade dos checklists diários.`
         ];
     }
 
@@ -179,47 +180,42 @@ function generateExecutiveAnalysis(stats, periodTitle) {
     const topNokList = Object.entries(nokQuestionsCount).sort((a, b) => b[1] - a[1]);
     const topNokIssues = topNokList.slice(0, 2).map(([q]) => q.toLowerCase()).join(', ');
 
-    // 1. Linha 1: Conformidade Geral & Destaques Positivos
+    // 1. Linha 1: Conformidade Geral & Destaques Positivos (Curta e direta)
     let line1 = '';
-    const topSummary = topVehicles.length > 0
-        ? `com destaque operacional de ${topVehicles.slice(0, 3).map(v => `${v.plate} (${v.conformityPct}%)`).join(', ')}`
-        : `sem veículos atingindo 95% de conformidade`;
-
+    const topNames = topVehicles.slice(0, 2).map(v => `${v.plate} (${v.conformityPct}%)`).join(', ');
     if (fleetConformity >= 95) {
-        line1 = `• Conformidade e Destaques: Nível de excelência com ${fleetConformity}% de itens conformes em ${periodTitle}, ${topSummary}.`;
+        line1 = `• Conformidade Geral: Nível de excelência de ${fleetConformity}% em ${periodTitle}${topNames ? `; destaques: ${topNames}` : ''}.`;
     } else if (fleetConformity >= 90) {
-        line1 = `• Conformidade e Destaques: Nível estável de ${fleetConformity}% em ${periodTitle}, ${topSummary}.`;
+        line1 = `• Conformidade Geral: Nível estável de ${fleetConformity}% em ${periodTitle}${topNames ? `; destaques: ${topNames}` : ''}.`;
     } else {
-        line1 = `• Conformidade Geral: Índice de ${fleetConformity}% abaixo da meta padrão (95%) em ${periodTitle}, exigindo alinhamento corretivo.`;
+        line1 = `• Conformidade Geral: Índice de ${fleetConformity}% abaixo da meta (95%) em ${periodTitle}; requer alinhamento corretivo.`;
     }
 
-    // 2. Linha 2: Pontos de Atenção & Manutenção Mecânica
+    // 2. Linha 2: Pontos de Atenção & Manutenção Mecânica (Sem duplicidade)
     let line2 = '';
     if (criticalVehicles.length > 0) {
-        const critNames = criticalVehicles.map(v => `${v.plate} (${v.conformityPct}%)`).slice(0, 3).join(', ');
-        line2 = `• Pontos Críticos: Atenção prioritária para ${critNames}${topNokIssues ? ` com reincidências mecânicas em ${topNokIssues}` : ''}.`;
+        const critNames = criticalVehicles.slice(0, 2).map(v => `${v.plate} (${v.conformityPct}%)`).join(', ');
+        line2 = `• Pontos Críticos: Atenção em ${critNames}${topNokIssues ? ` (itens: ${topNokIssues})` : ''}.`;
     } else if (attentionVehicles.length > 0) {
-        const attNames = attentionVehicles.map(v => `${v.plate} (${v.conformityPct}%)`).slice(0, 3).join(', ');
-        line2 = `• Pontos de Atenção: Frotas ${attNames} em zona intermediária (90%-94%)${topNokIssues ? `, com apontamentos em ${topNokIssues}` : ''}.`;
+        const attNames = attentionVehicles.slice(0, 2).map(v => `${v.plate} (${v.conformityPct}%)`).join(', ');
+        line2 = `• Pontos de Atenção: Frotas ${attNames} em 90%-94%${topNokIssues ? ` (itens: ${topNokIssues})` : ''}.`;
     } else {
-        line2 = `• Segurança Mecânica: Nenhum veículo em estado crítico; 100% da frota operando acima de 95% de conformidade.`;
+        line2 = `• Segurança Mecânica: 100% da frota operando com conformidade exemplar (acima de 95%).`;
     }
 
-    // 3. Linha 3: Engajamento dos Condutores & Recomendações
+    // 3. Linha 3: Engajamento dos Condutores & Recomendações (Sintética)
     let line3 = '';
-    const bestDrivers = driverList.length > 0
-        ? `liderado por ${driverList.slice(0, 2).map(d => `${d.name} (${d.pct}%)`).join(' e ')}`
-        : 'sem condutores identificados';
+    const topDriver = driverList.length > 0 ? `${driverList[0].name} (${driverList[0].pct}%)` : '—';
     const avgEngage = driverList.length > 0
         ? Math.round(driverList.reduce((acc, d) => acc + d.pct, 0) / driverList.length)
         : 0;
 
     if (criticalVehicles.length > 0 || fleetConformity < 93) {
-        line3 = `• Engajamento e Diretrizes: Média de ${avgEngage}% de preenchimento (${bestDrivers}); programar revisões imediatas nos itens sinalizados.`;
+        line3 = `• Engajamento e Diretrizes: Média de ${avgEngage}% (líder: ${topDriver}); agendar revisões imediatas.`;
     } else if (fleetConformity >= 96 && avgEngage >= 60) {
-        line3 = `• Engajamento e Diretrizes: Alta adesão com média de ${avgEngage}% (${bestDrivers}); manter rotinas preventivas e parabenizar a equipe.`;
+        line3 = `• Engajamento e Diretrizes: Média de ${avgEngage}% (líder: ${topDriver}); manter rotinas preventivas da frota.`;
     } else {
-        line3 = `• Engajamento e Diretrizes: Média de ${avgEngage}% de preenchimento (${bestDrivers}); manter acompanhamento diário das ordens de serviço.`;
+        line3 = `• Engajamento e Diretrizes: Média de ${avgEngage}% (líder: ${topDriver}); reforçar preenchimento diário do checklist.`;
     }
 
     return [line1, line2, line3];
@@ -254,7 +250,8 @@ function renderChartToDataUrl(dailyStats, theme) {
         return canvas.toDataURL('image/png');
     }
 
-    const padding = { top: 35, right: 35, bottom: 55, left: 65 };
+    // Generous bottom padding (80px) so X labels and 0% mark are never clipped
+    const padding = { top: 25, right: 35, bottom: 80, left: 65 };
     const chartW = canvas.width - padding.left - padding.right;
     const chartH = canvas.height - padding.top - padding.bottom;
 
@@ -391,7 +388,7 @@ function renderChartToDataUrl(dailyStats, theme) {
         if (!p) return;
         const [, m, day] = p.date.split('-');
         const label = `${parseInt(day)}/${parseInt(m)}`;
-        ctx.fillText(label, p.x, padding.top + chartH + 28);
+        ctx.fillText(label, p.x, padding.top + chartH + 30);
     });
 
     return canvas.toDataURL('image/png');
@@ -531,7 +528,6 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
     });
 
     // ─── 3. MIDDLE ROW: CHART (Expanded) + DRIVER ENGAGEMENT (Compact) ───
-    // Driver box reduced by 30% (from 3.60 to 2.50). Chart expanded from 5.50 to 6.60.
     const chartW = 6.60;
     const engageW = 2.50;
     const midY = 2.26;
@@ -551,11 +547,11 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
         color: theme.textPrimary, bold: true
     });
 
-    // Render Canvas chart image
+    // Render Canvas chart image (clean margin inside card container)
     const chartImgData = renderChartToDataUrl(stats.dailyStats, theme);
     slide.addImage({
         data: chartImgData,
-        x: 0.44, y: midY + 0.30, w: chartW - 0.08, h: midH - 0.36
+        x: 0.48, y: midY + 0.28, w: chartW - 0.16, h: midH - 0.38
     });
 
     // --- Driver Engagement Box (Right - 2.50 width) ---
@@ -573,7 +569,7 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
         color: theme.textPrimary, bold: true
     });
 
-    // Driver table list (tight spacing, badge right beside name)
+    // Driver table list
     const driversToShow = stats.driverList.slice(0, 5);
     if (driversToShow.length === 0) {
         slide.addText("Sem registros de condutores", {
@@ -592,10 +588,13 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
                 color: theme.textPrimary, bold: false
             });
 
-            // Engagement Badge % (positioned compactly beside the name)
-            let badgeColor = theme.green;
-            if (drv.pct < 70) badgeColor = theme.red;
-            else if (drv.pct < 90) badgeColor = theme.amber;
+            // Engagement Badge % (User Rule: 96%-100% verde, 90%-95% amarelo, <90% vermelho)
+            let badgeColor = theme.red;
+            if (drv.pct >= 96) {
+                badgeColor = theme.green;
+            } else if (drv.pct >= 90) {
+                badgeColor = theme.amber;
+            }
 
             slide.addShape(pres.ShapeType.roundRect, {
                 x: engageX + 1.55, y: dy, w: 0.85, h: 0.22,
@@ -629,15 +628,15 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
         color: theme.gold, bold: true
     });
 
-    // 3 Lines of AI Analysis
+    // 3 Lines of AI Analysis formatted cleanly
     const analysisLines = generateExecutiveAnalysis(stats, subtitleDate);
     const analysisTextObjects = analysisLines.map((line, idx) => ({
         text: line + (idx < analysisLines.length - 1 ? '\n' : ''),
         options: {
-            fontSize: 8.5,
+            fontSize: 8.0,
             fontFace: 'Inter',
             color: theme.textPrimary,
-            paraSpaceAfter: 2
+            paraSpaceAfter: 4
         }
     }));
 
@@ -645,7 +644,7 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
         x: 0.55, y: botY + 0.24, w: 8.9, h: 0.68,
         align: 'left',
         valign: 'top',
-        lineSpacing: 11
+        lineSpacing: 10
     });
 }
 
