@@ -154,18 +154,16 @@ function aggregateDataForMonths(data, monthsList) {
 }
 
 /**
- * Generates an automated 5-line executive AI analysis
+ * Generates an automated synthesized 3-line executive AI analysis
  */
 function generateExecutiveAnalysis(stats, periodTitle) {
     const { vehicleStats, fleetConformity, fleetTotal, driverList, nokQuestionsCount } = stats;
 
     if (fleetTotal === 0) {
         return [
-            `• Diagnóstico Geral: Sem registros de checklist suficientes no período de ${periodTitle}.`,
-            `• Veículos Críticos: Nenhum apontamento mecânico identificado por ausência de dados.`,
-            `• Destaques da Frota: Aguardando preenchimento das primeiras vistorias operacionais.`,
-            `• Engajamento dos Condutores: Necessário incentivar a alimentação diária dos formulários.`,
-            `• Recomendação: Verificar a regularidade dos condutores na utilização do checklist.`
+            `• Conformidade Geral: Sem registros de checklist suficientes no período de ${periodTitle}.`,
+            `• Pontos de Atenção: Nenhum apontamento mecânico registrado por ausência de vistorias.`,
+            `• Engajamento e Diretrizes: Necessário incentivar os condutores a realizarem o checklist diário da frota.`
         ];
     }
 
@@ -181,72 +179,65 @@ function generateExecutiveAnalysis(stats, periodTitle) {
     const topNokList = Object.entries(nokQuestionsCount).sort((a, b) => b[1] - a[1]);
     const topNokIssues = topNokList.slice(0, 2).map(([q]) => q.toLowerCase()).join(', ');
 
-    // 1. Linha 1: Diagnóstico Geral
+    // 1. Linha 1: Conformidade Geral & Destaques Positivos
     let line1 = '';
+    const topSummary = topVehicles.length > 0
+        ? `com destaque operacional de ${topVehicles.slice(0, 3).map(v => `${v.plate} (${v.conformityPct}%)`).join(', ')}`
+        : `sem veículos atingindo 95% de conformidade`;
+
     if (fleetConformity >= 95) {
-        line1 = `• Conformidade Geral: Nível de excelência operacional com ${fleetConformity}% de itens conformes em ${periodTitle}.`;
+        line1 = `• Conformidade e Destaques: Nível de excelência com ${fleetConformity}% de itens conformes em ${periodTitle}, ${topSummary}.`;
     } else if (fleetConformity >= 90) {
-        line1 = `• Conformidade Geral: Nível estável de ${fleetConformity}%, com desvios pontuais requerendo monitoramento.`;
+        line1 = `• Conformidade e Destaques: Nível estável de ${fleetConformity}% em ${periodTitle}, ${topSummary}.`;
     } else {
-        line1 = `• Conformidade Geral: Índice de ${fleetConformity}% abaixo da meta operacional (95%), exigindo plano de ação corretivo.`;
+        line1 = `• Conformidade Geral: Índice de ${fleetConformity}% abaixo da meta padrão (95%) em ${periodTitle}, exigindo alinhamento corretivo.`;
     }
 
-    // 2. Linha 2: Veículos Críticos
+    // 2. Linha 2: Pontos de Atenção & Manutenção Mecânica
     let line2 = '';
     if (criticalVehicles.length > 0) {
         const critNames = criticalVehicles.map(v => `${v.plate} (${v.conformityPct}%)`).slice(0, 3).join(', ');
-        line2 = `• Veículos Críticos: Atenção urgente para ${critNames}${topNokIssues ? ` com reincidências em ${topNokIssues}` : ''}.`;
+        line2 = `• Pontos Críticos: Atenção prioritária para ${critNames}${topNokIssues ? ` com reincidências mecânicas em ${topNokIssues}` : ''}.`;
     } else if (attentionVehicles.length > 0) {
         const attNames = attentionVehicles.map(v => `${v.plate} (${v.conformityPct}%)`).slice(0, 3).join(', ');
-        line2 = `• Pontos de Atenção: Frotas ${attNames} em zona intermediária de conformidade (90%-94%).`;
+        line2 = `• Pontos de Atenção: Frotas ${attNames} em zona intermediária (90%-94%)${topNokIssues ? `, com apontamentos em ${topNokIssues}` : ''}.`;
     } else {
-        line2 = `• Veículos Críticos: Nenhum veículo em estado crítico; toda a frota operou acima de 95% de conformidade.`;
+        line2 = `• Segurança Mecânica: Nenhum veículo em estado crítico; 100% da frota operando acima de 95% de conformidade.`;
     }
 
-    // 3. Linha 3: Destaques Positivos
+    // 3. Linha 3: Engajamento dos Condutores & Recomendações
     let line3 = '';
-    if (topVehicles.length > 0) {
-        const topNames = topVehicles.slice(0, 4).map(v => `${v.plate} (${v.conformityPct}%)`).join(', ');
-        line3 = `• Destaques da Frota: Desempenho exemplar de ${topNames}, assegurando alta disponibilidade mecânica.`;
-    } else {
-        line3 = `• Destaques da Frota: Sem veículos atingindo o índice padrão de 95% de conformidade neste ciclo.`;
-    }
+    const bestDrivers = driverList.length > 0
+        ? `liderado por ${driverList.slice(0, 2).map(d => `${d.name} (${d.pct}%)`).join(' e ')}`
+        : 'sem condutores identificados';
+    const avgEngage = driverList.length > 0
+        ? Math.round(driverList.reduce((acc, d) => acc + d.pct, 0) / driverList.length)
+        : 0;
 
-    // 4. Linha 4: Engajamento dos Condutores
-    let line4 = '';
-    if (driverList.length > 0) {
-        const bestDrivers = driverList.slice(0, 2).map(d => `${d.name} (${d.pct}%)`).join(' e ');
-        const avgEngage = Math.round(driverList.reduce((acc, d) => acc + d.pct, 0) / driverList.length);
-        line4 = `• Engajamento dos Motoristas: Média de ${avgEngage}% de preenchimento, liderado por ${bestDrivers}.`;
-    } else {
-        line4 = `• Engajamento dos Motoristas: Registros incompletos de condutores no período analisado.`;
-    }
-
-    // 5. Linha 5: Recomendações Práticas
-    let line5 = '';
     if (criticalVehicles.length > 0 || fleetConformity < 93) {
-        line5 = `• Recomendação: Programar revisão preventiva prioritária nos itens sinalizados e alinhar checklist com os condutores.`;
-    } else if (fleetConformity >= 96 && driverList.length > 0 && driverList[0].pct >= 85) {
-        line5 = `• Recomendação: Manter as rotinas preventivas e parabenizar a equipe pela disciplina operacional e conservação da frota.`;
+        line3 = `• Engajamento e Diretrizes: Média de ${avgEngage}% de preenchimento (${bestDrivers}); programar revisões imediatas nos itens sinalizados.`;
+    } else if (fleetConformity >= 96 && avgEngage >= 60) {
+        line3 = `• Engajamento e Diretrizes: Alta adesão com média de ${avgEngage}% (${bestDrivers}); manter rotinas preventivas e parabenizar a equipe.`;
     } else {
-        line5 = `• Recomendação: Reforçar o acompanhamento diário das ordens de serviço para assegurar índices acima de 95%.`;
+        line3 = `• Engajamento e Diretrizes: Média de ${avgEngage}% de preenchimento (${bestDrivers}); manter acompanhamento diário das ordens de serviço.`;
     }
 
-    return [line1, line2, line3, line4, line5];
+    return [line1, line2, line3];
 }
 
 /**
- * Creates an offscreen Canvas image of the conformity line chart for PPTX
+ * Creates an ultra-clean, high-DPI offscreen Canvas image of the conformity line chart for PPTX
  */
 function renderChartToDataUrl(dailyStats, theme) {
     const canvas = document.createElement('canvas');
-    canvas.width = 1100;
-    canvas.height = 360;
+    canvas.width = 1400;
+    canvas.height = 420;
     const ctx = canvas.getContext('2d');
 
     const isDark = theme.id === 'dark';
     const bgFill = isDark ? '#151D2A' : '#FFFFFF';
-    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+    const baselineColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)';
     const textColor = isDark ? '#94A3B8' : '#6B7280';
     const lineColor = isDark ? '#34D399' : '#10B981';
 
@@ -263,25 +254,40 @@ function renderChartToDataUrl(dailyStats, theme) {
         return canvas.toDataURL('image/png');
     }
 
-    const padding = { top: 40, right: 40, bottom: 60, left: 60 };
+    const padding = { top: 35, right: 35, bottom: 55, left: 65 };
     const chartW = canvas.width - padding.left - padding.right;
     const chartH = canvas.height - padding.top - padding.bottom;
 
     // Y Axis Grid lines (0%, 25%, 50%, 75%, 100%)
     ctx.lineWidth = 1;
-    ctx.strokeStyle = gridColor;
     ctx.fillStyle = textColor;
-    ctx.font = '16px Inter, Arial, sans-serif';
+    ctx.font = '500 16px Inter, Arial, sans-serif';
     ctx.textAlign = 'right';
 
     [0, 25, 50, 75, 100].forEach(val => {
         const y = padding.top + chartH - (val / 100) * chartH;
+        
         ctx.beginPath();
+        if (val === 0) {
+            // Solid baseline
+            ctx.setLineDash([]);
+            ctx.strokeStyle = baselineColor;
+            ctx.lineWidth = 1.5;
+        } else {
+            // Subtle dashed grid
+            ctx.setLineDash([4, 6]);
+            ctx.strokeStyle = gridColor;
+            ctx.lineWidth = 1;
+        }
         ctx.moveTo(padding.left, y);
         ctx.lineTo(canvas.width - padding.right, y);
         ctx.stroke();
-        ctx.fillText(`${val}%`, padding.left - 12, y + 5);
+
+        // Label
+        ctx.fillText(`${val}%`, padding.left - 14, y + 5);
     });
+
+    ctx.setLineDash([]); // Reset line dash
 
     // Points calculation
     const points = sortedDates.map((date, idx) => {
@@ -290,14 +296,15 @@ function renderChartToDataUrl(dailyStats, theme) {
         const pct = total > 0 ? (s.ok / total) * 100 : 0;
         const x = padding.left + (idx / Math.max(1, sortedDates.length - 1)) * chartW;
         const y = padding.top + chartH - (pct / 100) * chartH;
-        return { x, y, pct, date };
+        return { x, y, pct, date, idx };
     });
 
     // Gradient fill under the curve
     if (points.length > 1) {
         const grad = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartH);
-        grad.addColorStop(0, isDark ? 'rgba(52, 211, 153, 0.35)' : 'rgba(16, 185, 129, 0.25)');
-        grad.addColorStop(1, isDark ? 'rgba(52, 211, 153, 0.02)' : 'rgba(16, 185, 129, 0.01)');
+        grad.addColorStop(0, isDark ? 'rgba(52, 211, 153, 0.28)' : 'rgba(16, 185, 129, 0.20)');
+        grad.addColorStop(0.7, isDark ? 'rgba(52, 211, 153, 0.08)' : 'rgba(16, 185, 129, 0.05)');
+        grad.addColorStop(1, 'rgba(52, 211, 153, 0.0)');
 
         ctx.beginPath();
         ctx.moveTo(points[0].x, padding.top + chartH);
@@ -315,9 +322,9 @@ function renderChartToDataUrl(dailyStats, theme) {
         ctx.fill();
     }
 
-    // Line drawing
+    // Line drawing (smooth, crisp curve)
     ctx.beginPath();
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3.5;
     ctx.strokeStyle = lineColor;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -332,28 +339,59 @@ function renderChartToDataUrl(dailyStats, theme) {
     });
     ctx.stroke();
 
-    // Dots and X labels
-    const step = Math.ceil(points.length / 10);
-    ctx.textAlign = 'center';
-    ctx.font = '14px Inter, Arial, sans-serif';
+    // Find Min and Max points for clean milestone dots
+    let minPoint = points[0];
+    let maxPoint = points[0];
+    points.forEach(p => {
+        if (p.pct < minPoint.pct) minPoint = p;
+        if (p.pct > maxPoint.pct) maxPoint = p;
+    });
 
-    points.forEach((p, idx) => {
-        // Draw point dot
+    // Milestone points to render dots (Clean, avoid cluttering line of circles)
+    const milestoneSet = new Set();
+    if (points.length <= 15) {
+        points.forEach((_, i) => milestoneSet.add(i));
+    } else {
+        milestoneSet.add(0); // Start
+        milestoneSet.add(points.length - 1); // End
+        milestoneSet.add(minPoint.idx); // Min
+        milestoneSet.add(maxPoint.idx); // Max
+    }
+
+    milestoneSet.forEach(i => {
+        const p = points[i];
+        if (!p) return;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
         ctx.fillStyle = isDark ? '#0B0F19' : '#FFFFFF';
         ctx.fill();
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3;
         ctx.strokeStyle = lineColor;
         ctx.stroke();
+    });
 
-        // X Label
-        if (idx % step === 0 || idx === points.length - 1) {
-            const [, m, day] = p.date.split('-');
-            const label = `${parseInt(day)}/${parseInt(m)}`;
-            ctx.fillStyle = textColor;
-            ctx.fillText(label, p.x, padding.top + chartH + 26);
+    // X Labels (6 to 8 well-spaced clean dates)
+    const targetLabelCount = Math.min(7, points.length);
+    const labelIndices = [];
+    if (points.length <= targetLabelCount) {
+        points.forEach((_, i) => labelIndices.push(i));
+    } else {
+        const step = (points.length - 1) / (targetLabelCount - 1);
+        for (let k = 0; k < targetLabelCount; k++) {
+            labelIndices.push(Math.round(k * step));
         }
+    }
+
+    ctx.textAlign = 'center';
+    ctx.font = '500 15px Inter, Arial, sans-serif';
+    ctx.fillStyle = textColor;
+
+    labelIndices.forEach(idx => {
+        const p = points[idx];
+        if (!p) return;
+        const [, m, day] = p.date.split('-');
+        const label = `${parseInt(day)}/${parseInt(m)}`;
+        ctx.fillText(label, p.x, padding.top + chartH + 28);
     });
 
     return canvas.toDataURL('image/png');
@@ -366,9 +404,9 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
     const slide = pres.addSlide();
     slide.background = { color: theme.bg };
 
-    // ─── 1. HEADER (x: 0.4, y: 0.20, w: 9.2, h: 0.52) ───
+    // ─── 1. HEADER (x: 0.4, y: 0.18, w: 9.2, h: 0.46) ───
     slide.addShape(pres.ShapeType.roundRect, {
-        x: 0.4, y: 0.20, w: 9.2, h: 0.52,
+        x: 0.4, y: 0.18, w: 9.2, h: 0.46,
         fill: { color: theme.cardBg },
         line: { color: theme.cardBorder, width: 1 },
         radius: 0.06
@@ -376,36 +414,36 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
 
     // EFX Logo Text / Badge
     slide.addText("GRUPO EFX", {
-        x: 0.55, y: 0.27, w: 1.5, h: 0.35,
+        x: 0.55, y: 0.24, w: 1.5, h: 0.32,
         fontSize: 13, fontFace: 'Inter',
         color: theme.gold, bold: true
     });
 
     // Title
     slide.addText(title, {
-        x: 2.1, y: 0.25, w: 5.2, h: 0.38,
+        x: 2.1, y: 0.22, w: 5.2, h: 0.36,
         fontSize: 14, fontFace: 'Inter',
         color: theme.textPrimary, bold: true
     });
 
     // Period / Date Badge
     slide.addShape(pres.ShapeType.roundRect, {
-        x: 7.40, y: 0.27, w: 2.05, h: 0.35,
+        x: 7.40, y: 0.24, w: 2.05, h: 0.32,
         fill: { color: theme.goldLight },
         line: { color: theme.gold, width: 1 },
         radius: 0.06
     });
 
     slide.addText(subtitleDate, {
-        x: 7.40, y: 0.27, w: 2.05, h: 0.35,
+        x: 7.40, y: 0.24, w: 2.05, h: 0.32,
         fontSize: 9.5, fontFace: 'Inter',
         color: theme.gold, bold: true, align: 'center', valign: 'middle'
     });
 
-    // ─── 2. VEHICLE CARDS (x: 0.4, y: 0.80, w: 9.2, h: 1.60) ───
+    // ─── 2. VEHICLE CARDS (x: 0.4, y: 0.70, w: 9.2, h: 1.50) ───
     const cardsPerRow = 5;
     const cardW = 1.76;
-    const cardH = 0.72;
+    const cardH = 0.70;
     const gapX = 0.10;
     const gapY = 0.08;
 
@@ -413,7 +451,7 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
         const row = Math.floor(idx / cardsPerRow);
         const col = idx % cardsPerRow;
         const cx = 0.4 + col * (cardW + gapX);
-        const cy = 0.80 + row * (cardH + gapY);
+        const cy = 0.70 + row * (cardH + gapY);
 
         const vStat = stats.vehicleStats[v.plate] || { conformityPct: null, latestKm: 0 };
         const pct = vStat.conformityPct;
@@ -456,21 +494,21 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
 
         // Conformity Percentage
         slide.addText(pctText, {
-            x: cx + 0.08, y: cy + 0.25, w: 0.85, h: 0.25,
+            x: cx + 0.08, y: cy + 0.24, w: 0.85, h: 0.25,
             fontSize: 14, fontFace: 'Inter',
             color: pctColor, bold: true
         });
 
         // Conformity Label
         slide.addText(statusText, {
-            x: cx + 0.90, y: cy + 0.29, w: 0.78, h: 0.18,
+            x: cx + 0.90, y: cy + 0.28, w: 0.78, h: 0.18,
             fontSize: 7.5, fontFace: 'Inter',
             color: theme.textMuted, align: 'left'
         });
 
         // Conformity Progress Bar Background
         slide.addShape(pres.ShapeType.rect, {
-            x: cx + 0.08, y: cy + 0.51, w: cardW - 0.16, h: 0.03,
+            x: cx + 0.08, y: cy + 0.49, w: cardW - 0.16, h: 0.03,
             fill: { color: theme.barBg },
             line: { color: theme.barBg, width: 0 }
         });
@@ -478,7 +516,7 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
         // Filled Progress Bar
         if (pct !== null && pct > 0) {
             slide.addShape(pres.ShapeType.rect, {
-                x: cx + 0.08, y: cy + 0.51, w: (cardW - 0.16) * (pct / 100), h: 0.03,
+                x: cx + 0.08, y: cy + 0.49, w: (cardW - 0.16) * (pct / 100), h: 0.03,
                 fill: { color: pctColor },
                 line: { color: pctColor, width: 0 }
             });
@@ -486,19 +524,20 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
 
         // KM Footer
         slide.addText(`KM: ${kmText}`, {
-            x: cx + 0.08, y: cy + 0.55, w: cardW - 0.16, h: 0.15,
+            x: cx + 0.08, y: cy + 0.53, w: cardW - 0.16, h: 0.15,
             fontSize: 7, fontFace: 'Inter',
             color: theme.textSecondary, align: 'center'
         });
     });
 
-    // ─── 3. MIDDLE ROW (x: 0.4, y: 2.46, w: 9.2, h: 1.62) ───
-    const chartW = 5.50;
-    const engageW = 3.60;
-    const midY = 2.46;
-    const midH = 1.62;
+    // ─── 3. MIDDLE ROW: CHART (Expanded) + DRIVER ENGAGEMENT (Compact) ───
+    // Driver box reduced by 30% (from 3.60 to 2.50). Chart expanded from 5.50 to 6.60.
+    const chartW = 6.60;
+    const engageW = 2.50;
+    const midY = 2.26;
+    const midH = 1.88;
 
-    // --- Chart Box (Left) ---
+    // --- Chart Box (Left - 6.60 width) ---
     slide.addShape(pres.ShapeType.roundRect, {
         x: 0.4, y: midY, w: chartW, h: midH,
         fill: { color: theme.cardBg },
@@ -507,8 +546,8 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
     });
 
     slide.addText("Evolução da Conformidade Diária (%)", {
-        x: 0.55, y: midY + 0.08, w: 4.5, h: 0.22,
-        fontSize: 11, fontFace: 'Inter',
+        x: 0.55, y: midY + 0.08, w: 5.5, h: 0.20,
+        fontSize: 10.5, fontFace: 'Inter',
         color: theme.textPrimary, bold: true
     });
 
@@ -516,10 +555,10 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
     const chartImgData = renderChartToDataUrl(stats.dailyStats, theme);
     slide.addImage({
         data: chartImgData,
-        x: 0.45, y: midY + 0.32, w: chartW - 0.10, h: midH - 0.36
+        x: 0.44, y: midY + 0.30, w: chartW - 0.08, h: midH - 0.36
     });
 
-    // --- Driver Engagement Box (Right) ---
+    // --- Driver Engagement Box (Right - 2.50 width) ---
     const engageX = 0.4 + chartW + 0.10;
     slide.addShape(pres.ShapeType.roundRect, {
         x: engageX, y: midY, w: engageW, h: midH,
@@ -528,54 +567,54 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
         radius: 0.06
     });
 
-    slide.addText("Engajamento dos Motoristas (%)", {
-        x: engageX + 0.15, y: midY + 0.08, w: 3.3, h: 0.22,
-        fontSize: 11, fontFace: 'Inter',
+    slide.addText("Engajamento (%)", {
+        x: engageX + 0.12, y: midY + 0.08, w: 2.26, h: 0.20,
+        fontSize: 10.5, fontFace: 'Inter',
         color: theme.textPrimary, bold: true
     });
 
-    // Driver table list
+    // Driver table list (tight spacing, badge right beside name)
     const driversToShow = stats.driverList.slice(0, 5);
     if (driversToShow.length === 0) {
-        slide.addText("Nenhum registro de condutor", {
-            x: engageX + 0.15, y: midY + 0.60, w: 3.3, h: 0.30,
-            fontSize: 10, fontFace: 'Inter',
+        slide.addText("Sem registros de condutores", {
+            x: engageX + 0.10, y: midY + 0.75, w: engageW - 0.20, h: 0.30,
+            fontSize: 9.5, fontFace: 'Inter',
             color: theme.textMuted, align: 'center'
         });
     } else {
         driversToShow.forEach((drv, i) => {
-            const dy = midY + 0.34 + i * 0.24;
+            const dy = midY + 0.34 + i * 0.29;
             
-            // Driver Name
+            // Driver Name (aligned left)
             slide.addText(`${i + 1}. ${drv.name}`, {
-                x: engageX + 0.15, y: dy, w: 2.2, h: 0.20,
-                fontSize: 9, fontFace: 'Inter',
+                x: engageX + 0.10, y: dy, w: 1.42, h: 0.22,
+                fontSize: 8.5, fontFace: 'Inter',
                 color: theme.textPrimary, bold: false
             });
 
-            // Engagement Badge %
+            // Engagement Badge % (positioned compactly beside the name)
             let badgeColor = theme.green;
             if (drv.pct < 70) badgeColor = theme.red;
             else if (drv.pct < 90) badgeColor = theme.amber;
 
             slide.addShape(pres.ShapeType.roundRect, {
-                x: engageX + 2.50, y: dy - 0.01, w: 0.95, h: 0.20,
+                x: engageX + 1.55, y: dy, w: 0.85, h: 0.22,
                 fill: { color: theme.id === 'dark' ? '1E293B' : 'F3F4F6' },
                 line: { color: badgeColor, width: 1 },
                 radius: 0.04
             });
 
             slide.addText(`${drv.pct}% (${drv.count}d)`, {
-                x: engageX + 2.50, y: dy - 0.01, w: 0.95, h: 0.20,
+                x: engageX + 1.55, y: dy, w: 0.85, h: 0.22,
                 fontSize: 8, fontFace: 'Inter',
                 color: badgeColor, bold: true, align: 'center', valign: 'middle'
             });
         });
     }
 
-    // ─── 4. BOTTOM ROW: 5-LINE AI ANALYSIS (x: 0.4, y: 4.16, w: 9.2, h: 1.28) ───
-    const botY = 4.16;
-    const botH = 1.28;
+    // ─── 4. BOTTOM ROW: 3-LINE SYNTHESIZED AI ANALYSIS (x: 0.4, y: 4.22, w: 9.2, h: 0.98) ───
+    const botY = 4.22;
+    const botH = 0.98;
 
     slide.addShape(pres.ShapeType.roundRect, {
         x: 0.4, y: botY, w: 9.2, h: botH,
@@ -585,12 +624,12 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
     });
 
     slide.addText("Análise Executiva IA — Diagnóstico de Operação e Engajamento", {
-        x: 0.55, y: botY + 0.06, w: 8.9, h: 0.20,
-        fontSize: 10.5, fontFace: 'Inter',
+        x: 0.55, y: botY + 0.06, w: 8.9, h: 0.18,
+        fontSize: 9.5, fontFace: 'Inter',
         color: theme.gold, bold: true
     });
 
-    // 5 Lines of AI Analysis
+    // 3 Lines of AI Analysis
     const analysisLines = generateExecutiveAnalysis(stats, subtitleDate);
     const analysisTextObjects = analysisLines.map((line, idx) => ({
         text: line + (idx < analysisLines.length - 1 ? '\n' : ''),
@@ -603,10 +642,10 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
     }));
 
     slide.addText(analysisTextObjects, {
-        x: 0.55, y: botY + 0.27, w: 8.9, h: 0.95,
+        x: 0.55, y: botY + 0.24, w: 8.9, h: 0.68,
         align: 'left',
         valign: 'top',
-        lineSpacing: 12
+        lineSpacing: 11
     });
 }
 
