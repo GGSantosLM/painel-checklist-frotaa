@@ -1681,3 +1681,453 @@ button {
     font-size: var(--font-size-xs);
     font-weight: 600;
 }
+
+/* ============================
+   PPTX EXPORT BUTTON
+   ============================ */
+.btn-pptx-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--clr-primary-light);
+    color: var(--clr-primary);
+    border: 1px solid var(--clr-primary);
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    font-family: var(--font-family);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-pptx-export:hover {
+    background: var(--clr-primary);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-pptx-export .material-icons-round {
+    font-size: 16px;
+}
+
+/* ============================
+   PPTX MODAL & BACKDROP
+   ============================ */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.pptx-modal {
+    background: var(--bg-card);
+    border: 1px solid var(--clr-border);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.pptx-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--clr-border-light);
+}
+
+.pptx-modal-title-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.pptx-icon {
+    font-size: 24px;
+    color: var(--clr-primary);
+}
+
+.pptx-modal-title-group h2 {
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--clr-text);
+}
+
+.modal-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--clr-text-muted);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+    background: var(--clr-border-light);
+    color: var(--clr-text);
+}
+
+.pptx-modal-body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.pptx-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.pptx-label {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    color: var(--clr-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+/* Theme Selector Cards */
+.pptx-theme-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+.pptx-theme-card {
+    position: relative;
+    cursor: pointer;
+}
+
+.pptx-theme-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.theme-card-inner {
+    border: 2px solid var(--clr-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-page);
+    transition: all var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.pptx-theme-card:hover .theme-card-inner {
+    border-color: var(--clr-primary);
+}
+
+.pptx-theme-card.active .theme-card-inner,
+.pptx-theme-card input[type="radio"]:checked + .theme-card-inner {
+    border-color: var(--clr-primary);
+    box-shadow: 0 0 0 1px var(--clr-primary);
+}
+
+.theme-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--clr-text);
+}
+
+.theme-card-header .material-icons-round {
+    font-size: 18px;
+    color: var(--clr-primary);
+}
+
+.theme-preview-box {
+    border-radius: var(--radius-sm);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.preview-dark {
+    background: #0B0F19;
+    border: 1px solid #263345;
+}
+
+.preview-light {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+}
+
+.preview-line-title {
+    width: 45%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--clr-primary);
+}
+
+.preview-grid {
+    display: flex;
+    gap: 4px;
+}
+
+.preview-cell {
+    flex: 1;
+    height: 14px;
+    border-radius: 2px;
+}
+
+.preview-dark .preview-cell {
+    background: #151D2A;
+    border: 1px solid #263345;
+}
+
+.preview-light .preview-cell {
+    background: #F4F6FA;
+    border: 1px solid #E5E7EB;
+}
+
+/* Range grid */
+.pptx-range-grid {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.range-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.range-label {
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--clr-text-muted);
+}
+
+.range-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--clr-text-muted);
+    padding-top: 18px;
+}
+
+.pptx-range-grid .select-wrapper {
+    width: 100%;
+}
+
+.pptx-range-grid .conformity-month-select {
+    width: 100%;
+    padding: 8px 28px 8px 12px;
+    font-size: var(--font-size-sm);
+}
+
+/* Checkboxes */
+.pptx-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.pptx-checkbox-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-page);
+    border: 1px solid var(--clr-border-light);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.pptx-checkbox-card:hover {
+    border-color: var(--clr-primary);
+}
+
+.pptx-checkbox-card input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.checkbox-custom {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid var(--clr-border);
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+}
+
+.pptx-checkbox-card input[type="checkbox"]:checked ~ .checkbox-custom {
+    background: var(--clr-primary);
+    border-color: var(--clr-primary);
+}
+
+.pptx-checkbox-card input[type="checkbox"]:checked ~ .checkbox-custom::after {
+    content: '✓';
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.checkbox-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.checkbox-title {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--clr-text);
+}
+
+.checkbox-desc {
+    font-size: var(--font-size-xs);
+    color: var(--clr-text-muted);
+}
+
+.pptx-warning {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--clr-amber-bg);
+    color: var(--clr-amber);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.pptx-warning .material-icons-round {
+    font-size: 16px;
+}
+
+/* Modal Footer */
+.pptx-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--clr-border-light);
+    background: var(--bg-page);
+    border-bottom-left-radius: var(--radius-xl);
+    border-bottom-right-radius: var(--radius-xl);
+}
+
+.btn-modal-cancel {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1px solid var(--clr-border);
+    color: var(--clr-text-secondary);
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-modal-cancel:hover {
+    background: var(--clr-border-light);
+    color: var(--clr-text);
+}
+
+.btn-modal-generate {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: var(--radius-sm);
+    background: var(--clr-primary);
+    border: 1px solid var(--clr-primary);
+    color: #FFFFFF;
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
+}
+
+.btn-modal-generate:hover:not(:disabled) {
+    background: var(--clr-primary-dark);
+    border-color: var(--clr-primary-dark);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-modal-generate:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .pptx-modal {
+        max-width: 100%;
+        margin: var(--space-sm);
+    }
+    .pptx-theme-selector {
+        grid-template-columns: 1fr;
+    }
+    .pptx-range-grid {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .range-divider {
+        padding-top: 0;
+        transform: rotate(90deg);
+    }
+}

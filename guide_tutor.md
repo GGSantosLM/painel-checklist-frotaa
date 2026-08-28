@@ -17,6 +17,7 @@
 - [x] Exibição contextual do motorista ao selecionar o dia no checklist (e ocultação automática na visão compilada).
 - [x] Seletor dinâmico de mês no card "Conformidade Geral da Frota" com cálculo consolidado de toda a frota (mês a mês e visão geral).
 - [x] Filtro mensal posicionado acima dos cartões da frota com sincronização e recálculo dinâmico da conformidade, KM e motoristas por veículo.
+- [x] Gerador de Apresentação PowerPoint (.pptx) com seleção de tema (Dark/Light), período, slide compilado e/ou páginas mensais, engajamento em porcentagem e análise executiva de 5 linhas com IA.
 
 
 

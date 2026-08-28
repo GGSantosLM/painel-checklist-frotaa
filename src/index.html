@@ -79,6 +79,10 @@
                             </select>
                             <span class="material-icons-round select-arrow">expand_more</span>
                         </div>
+                        <button id="btnOpenPptxModal" class="btn-pptx-export" title="Gerar Apresentação PowerPoint (.pptx)" aria-label="Exportar PowerPoint">
+                            <span class="material-icons-round">slideshow</span>
+                            <span>Apresentação PPTX</span>
+                        </button>
                     </div>
                 </div>
                 <div class="fleet-grid" id="fleetGrid">
@@ -283,8 +287,127 @@
         </section>
     </main>
 
+    <!-- ====== PPTX EXPORT MODAL ====== -->
+    <div class="modal-backdrop" id="pptxModalBackdrop" style="display:none;">
+        <div class="pptx-modal" id="pptxModal" role="dialog" aria-modal="true" aria-labelledby="pptxModalTitle">
+            <div class="pptx-modal-header">
+                <div class="pptx-modal-title-group">
+                    <span class="material-icons-round pptx-icon">slideshow</span>
+                    <h2 id="pptxModalTitle">Exportar Apresentação PowerPoint</h2>
+                </div>
+                <button class="modal-close-btn" id="btnClosePptxModal" aria-label="Fechar modal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+
+            <div class="pptx-modal-body">
+                <!-- 1. Theme Selection -->
+                <div class="pptx-form-group">
+                    <label class="pptx-label">1. Tema Visual da Apresentação</label>
+                    <div class="pptx-theme-selector">
+                        <label class="pptx-theme-card active" id="themeCardDark">
+                            <input type="radio" name="pptxTheme" value="dark" checked>
+                            <div class="theme-card-inner theme-card-dark">
+                                <div class="theme-card-header">
+                                    <span class="material-icons-round">dark_mode</span>
+                                    <span class="theme-name">Modo Escuro (Dark)</span>
+                                </div>
+                                <div class="theme-preview-box preview-dark">
+                                    <div class="preview-line preview-line-title"></div>
+                                    <div class="preview-grid">
+                                        <div class="preview-cell"></div>
+                                        <div class="preview-cell"></div>
+                                        <div class="preview-cell"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="pptx-theme-card" id="themeCardLight">
+                            <input type="radio" name="pptxTheme" value="light">
+                            <div class="theme-card-inner theme-card-light">
+                                <div class="theme-card-header">
+                                    <span class="material-icons-round">light_mode</span>
+                                    <span class="theme-name">Modo Claro (Light)</span>
+                                </div>
+                                <div class="theme-preview-box preview-light">
+                                    <div class="preview-line preview-line-title"></div>
+                                    <div class="preview-grid">
+                                        <div class="preview-cell"></div>
+                                        <div class="preview-cell"></div>
+                                        <div class="preview-cell"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 2. Date Range Selection -->
+                <div class="pptx-form-group">
+                    <label class="pptx-label">2. Período do Relatório</label>
+                    <div class="pptx-range-grid">
+                        <div class="range-field">
+                            <span class="range-label">Mês Inicial</span>
+                            <div class="select-wrapper">
+                                <select id="pptxStartMonth" class="conformity-month-select" aria-label="Mês inicial"></select>
+                                <span class="material-icons-round select-arrow">expand_more</span>
+                            </div>
+                        </div>
+                        <div class="range-divider">
+                            <span class="material-icons-round">arrow_forward</span>
+                        </div>
+                        <div class="range-field">
+                            <span class="range-label">Mês Final</span>
+                            <div class="select-wrapper">
+                                <select id="pptxEndMonth" class="conformity-month-select" aria-label="Mês final"></select>
+                                <span class="material-icons-round select-arrow">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Slide Structure Selection -->
+                <div class="pptx-form-group">
+                    <label class="pptx-label">3. Estrutura dos Slides</label>
+                    <div class="pptx-checkboxes">
+                        <label class="pptx-checkbox-card">
+                            <input type="checkbox" id="chkPptxCompiled" checked>
+                            <span class="checkbox-custom"></span>
+                            <div class="checkbox-text">
+                                <span class="checkbox-title">Slide Compilado do Período</span>
+                                <span class="checkbox-desc">Visão consolidando todos os meses selecionados (1ª página)</span>
+                            </div>
+                        </label>
+                        <label class="pptx-checkbox-card">
+                            <input type="checkbox" id="chkPptxMonthly" checked>
+                            <span class="checkbox-custom"></span>
+                            <div class="checkbox-text">
+                                <span class="checkbox-title">Slides Individuais por Mês</span>
+                                <span class="checkbox-desc">1 slide por mês selecionado, em ordem cronológica</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="pptx-warning" id="pptxStructureWarning" style="display:none;">
+                        <span class="material-icons-round">info</span>
+                        <span>Selecione pelo menos uma opção de slide para gerar a apresentação.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pptx-modal-footer">
+                <button type="button" class="btn-modal-cancel" id="btnCancelPptxModal">Cancelar</button>
+                <button type="button" class="btn-modal-generate" id="btnGeneratePptx">
+                    <span class="material-icons-round" id="btnGeneratePptxIcon">file_download</span>
+                    <span id="btnGeneratePptxText">Gerar e Baixar Apresentação</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script src="js/calendar.js"></script>
     <script src="js/charts.js"></script>
+    <script src="js/pptx-export.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

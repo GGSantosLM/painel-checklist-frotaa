@@ -1371,6 +1371,162 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Initialize PPTX Export Modal
+    initPptxModal();
+
     // Start on Home screen
     renderHome();
 });
+
+// ─── PPTX EXPORT MODAL LOGIC ───────────────
+function initPptxModal() {
+    const btnOpen = document.getElementById('btnOpenPptxModal');
+    const backdrop = document.getElementById('pptxModalBackdrop');
+    const btnClose = document.getElementById('btnClosePptxModal');
+    const btnCancel = document.getElementById('btnCancelPptxModal');
+    const btnGenerate = document.getElementById('btnGeneratePptx');
+    const btnGenerateText = document.getElementById('btnGeneratePptxText');
+    const btnGenerateIcon = document.getElementById('btnGeneratePptxIcon');
+    const startSelect = document.getElementById('pptxStartMonth');
+    const endSelect = document.getElementById('pptxEndMonth');
+    const chkCompiled = document.getElementById('chkPptxCompiled');
+    const chkMonthly = document.getElementById('chkPptxMonthly');
+    const warningEl = document.getElementById('pptxStructureWarning');
+    const themeCards = document.querySelectorAll('.pptx-theme-card');
+
+    if (!btnOpen || !backdrop) return;
+
+    // Theme selector card clicks
+    themeCards.forEach(card => {
+        card.addEventListener('click', () => {
+            themeCards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+
+    // Populate months in start and end selects
+    function populateMonthSelects() {
+        const months = new Set();
+        Object.values(state.data).forEach(vehicleData => {
+            Object.keys(vehicleData.days || {}).forEach(date => {
+                if (date.length >= 7) months.add(date.substring(0, 7));
+            });
+        });
+
+        const sortedMonths = Array.from(months).sort(); // oldest to newest
+        if (sortedMonths.length === 0) return;
+
+        const monthNames = window.PPTX_MONTH_NAMES || [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+
+        const buildOptions = () => sortedMonths.map(ym => {
+            const [y, m] = ym.split('-');
+            const label = `${monthNames[parseInt(m) - 1]} ${y}`;
+            return `<option value="${ym}">${label}</option>`;
+        }).join('');
+
+        startSelect.innerHTML = buildOptions();
+        endSelect.innerHTML = buildOptions();
+
+        // Defaults: first available month to last available month
+        startSelect.value = sortedMonths[0];
+        endSelect.value = sortedMonths[sortedMonths.length - 1];
+    }
+
+    // Open Modal
+    btnOpen.addEventListener('click', () => {
+        populateMonthSelects();
+        backdrop.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+
+    // Close Modal helper
+    const closeModal = () => {
+        backdrop.style.display = 'none';
+        document.body.style.overflow = '';
+    };
+
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (btnCancel) btnCancel.addEventListener('click', closeModal);
+
+    backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && backdrop.style.display === 'flex') {
+            closeModal();
+        }
+    });
+
+    // Validation on checkbox change
+    const validateStructure = () => {
+        const isValid = chkCompiled.checked || chkMonthly.checked;
+        if (warningEl) warningEl.style.display = isValid ? 'none' : 'flex';
+        btnGenerate.disabled = !isValid;
+        return isValid;
+    };
+
+    if (chkCompiled) chkCompiled.addEventListener('change', validateStructure);
+    if (chkMonthly) chkMonthly.addEventListener('change', validateStructure);
+
+    // Ensure startMonth <= endMonth
+    startSelect.addEventListener('change', () => {
+        if (startSelect.value > endSelect.value) {
+            endSelect.value = startSelect.value;
+        }
+    });
+
+    endSelect.addEventListener('change', () => {
+        if (endSelect.value < startSelect.value) {
+            startSelect.value = endSelect.value;
+        }
+    });
+
+    // Generate PPTX
+    btnGenerate.addEventListener('click', async () => {
+        if (!validateStructure()) return;
+
+        const selectedThemeRadio = document.querySelector('input[name="pptxTheme"]:checked');
+        const themeId = selectedThemeRadio ? selectedThemeRadio.value : 'dark';
+        const startMonth = startSelect.value;
+        const endMonth = endSelect.value;
+        const includeCompiled = chkCompiled.checked;
+        const includeMonthly = chkMonthly.checked;
+
+        btnGenerate.disabled = true;
+        btnGenerateIcon.textContent = 'hourglass_top';
+        btnGenerateText.textContent = 'Gerando Apresentação...';
+
+        try {
+            if (typeof generatePowerPointPresentation === 'function') {
+                await generatePowerPointPresentation({
+                    themeId,
+                    startMonth,
+                    endMonth,
+                    includeCompiled,
+                    includeMonthly,
+                    onProgress: (status) => {
+                        btnGenerateText.textContent = status;
+                    }
+                });
+            } else {
+                alert('Módulo de exportação PowerPoint não está disponível.');
+            }
+            setTimeout(() => {
+                closeModal();
+            }, 800);
+        } catch (err) {
+            console.error('Erro ao gerar apresentação PPTX:', err);
+            alert('Ocorreu um erro ao gerar a apresentação: ' + err.message);
+        } finally {
+            btnGenerate.disabled = false;
+            btnGenerateIcon.textContent = 'file_download';
+            btnGenerateText.textContent = 'Gerar e Baixar Apresentação';
+        }
+    });
+}
