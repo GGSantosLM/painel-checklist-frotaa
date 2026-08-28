@@ -1312,6 +1312,12 @@ button {
     gap: var(--space-sm);
 }
 
+.fleet-title-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .fleet-title-group {
     display: flex;
     align-items: center;
@@ -1332,6 +1338,12 @@ button {
 .fleet-subtitle {
     font-size: var(--font-size-sm);
     color: var(--clr-text-muted);
+}
+
+.fleet-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
 }
 
 /* Fleet Grid — multi-column layout */

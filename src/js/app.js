@@ -634,16 +634,28 @@ function getConformityColor(pct) {
     return 'var(--clr-red)';
 }
 
-function renderHome() {
+function renderFleetCards() {
     const grid = document.getElementById('fleetGrid');
     if (!grid) return;
 
+    const selectedMonth = state.overallMonth || 'all';
+
     grid.innerHTML = VEHICLES.map((v, idx) => {
         const vehicleData = state.data[v.plate] || { days: {} };
-        const pct = computeVehicleConformity(vehicleData.days);
-        const km = computeLatestKm(vehicleData.days);
-        const driverHistory = getDriverHistory(vehicleData.days);
-        const color = getConformityColor(pct);
+
+        // Filter days by selected month
+        const filteredDays = {};
+        Object.entries(vehicleData.days || {}).forEach(([date, dayData]) => {
+            if (selectedMonth === 'all' || date.startsWith(selectedMonth)) {
+                filteredDays[date] = dayData;
+            }
+        });
+
+        const hasData = Object.keys(filteredDays).length > 0;
+        const pct = hasData ? computeVehicleConformity(filteredDays) : null;
+        const km = computeLatestKm(filteredDays);
+        const driverHistory = getDriverHistory(filteredDays);
+        const color = pct !== null ? getConformityColor(pct) : 'var(--clr-text-muted)';
 
         const tooltipItems = driverHistory.length > 0
             ? driverHistory.map(d =>
@@ -652,7 +664,27 @@ function renderHome() {
                     <span class="vehicle-card__tooltip-driver">${d.driver}</span>
                 </div>`
             ).join('')
-            : '<div class="vehicle-card__tooltip-item" style="color:var(--clr-text-muted)">Sem registros</div>';
+            : '<div class="vehicle-card__tooltip-item" style="color:var(--clr-text-muted)">Sem registros no período</div>';
+
+        const conformityHtml = pct !== null
+            ? `
+                <div class="vehicle-card__conformity">
+                    <span class="vehicle-card__pct" style="color:${color}">${pct}%</span>
+                    <span class="vehicle-card__pct-label">conforme</span>
+                </div>
+                <div class="vehicle-card__bar">
+                    <div class="vehicle-card__bar-fill" style="width:${pct}%;background:${color}"></div>
+                </div>
+            `
+            : `
+                <div class="vehicle-card__conformity">
+                    <span class="vehicle-card__pct" style="color:var(--clr-text-muted)">—</span>
+                    <span class="vehicle-card__pct-label">sem dados</span>
+                </div>
+                <div class="vehicle-card__bar">
+                    <div class="vehicle-card__bar-fill" style="width:0%;background:transparent"></div>
+                </div>
+            `;
 
         return `
             <div class="vehicle-card" data-vehicle-index="${idx}">
@@ -664,13 +696,7 @@ function renderHome() {
                     <span class="vehicle-card__plate">${v.plate}</span>
                     <span class="vehicle-card__model">${v.model}</span>
                 </div>
-                <div class="vehicle-card__conformity">
-                    <span class="vehicle-card__pct" style="color:${color}">${pct}%</span>
-                    <span class="vehicle-card__pct-label">conforme</span>
-                </div>
-                <div class="vehicle-card__bar">
-                    <div class="vehicle-card__bar-fill" style="width:${pct}%;background:${color}"></div>
-                </div>
+                ${conformityHtml}
                 <div class="vehicle-card__km">
                     <span class="material-icons-round vehicle-card__km-icon">speed</span>
                     <span class="vehicle-card__km-value">${km > 0 ? km.toLocaleString('pt-BR') + ' km' : 'Sem registro'}</span>
@@ -687,12 +713,23 @@ function renderHome() {
             const idx = parseInt(card.dataset.vehicleIndex);
             state.activeVehicle = idx;
             state.selectedDate = null;
+            if (state.overallMonth && state.overallMonth !== 'all') {
+                const [y, m] = state.overallMonth.split('-');
+                if (calendar && calendar.goTo) {
+                    calendar.goTo(parseInt(y), parseInt(m) - 1);
+                }
+            }
             navigateTo('dashboard');
         });
     });
+}
 
+function renderHome() {
     // Init overall conformity month select
     initOverallMonthSelect();
+
+    // Render fleet cards with current month filter
+    renderFleetCards();
 
     // Render overall conformity chart
     renderOverallConformityChart();
@@ -734,6 +771,7 @@ function initOverallMonthSelect() {
 
     select.onchange = () => {
         state.overallMonth = select.value;
+        renderFleetCards();
         renderOverallConformityChart();
     };
 }
