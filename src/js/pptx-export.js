@@ -378,10 +378,51 @@ function renderChartToDataUrl(dailyStats, theme) {
     return canvas.toDataURL('image/png');
 }
 
+let cachedLogoDataUrl = null;
+
+/**
+ * Loads the Grupo EFX logo as a Base64 data URL
+ */
+async function getLogoDataUrl() {
+    if (cachedLogoDataUrl) return cachedLogoDataUrl;
+
+    const imgEl = document.querySelector('.header-logo-efx') || document.querySelector('img[src*="logo-grupo-efx"]');
+    if (imgEl && imgEl.complete && imgEl.naturalWidth > 0) {
+        try {
+            const canvas = document.createElement('canvas');
+            canvas.width = imgEl.naturalWidth;
+            canvas.height = imgEl.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(imgEl, 0, 0);
+            cachedLogoDataUrl = canvas.toDataURL('image/png');
+            return cachedLogoDataUrl;
+        } catch (e) {
+            console.warn('Canvas conversion of logo image failed:', e);
+        }
+    }
+
+    try {
+        const response = await fetch('assets/logo-grupo-efx.png');
+        const blob = await response.blob();
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                cachedLogoDataUrl = reader.result;
+                resolve(cachedLogoDataUrl);
+            };
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+        });
+    } catch (e) {
+        console.warn('Could not fetch logo image:', e);
+        return null;
+    }
+}
+
 /**
  * Builds a single slide in PowerPoint (Widescreen 16:9)
  */
-function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
+function addDashboardSlide(pres, theme, title, subtitleDate, stats, logoImgData) {
     const slide = pres.addSlide();
     slide.background = { color: theme.bg };
 
@@ -393,17 +434,39 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats) {
         radius: 0.06
     });
 
-    // EFX Logo Text / Badge
-    slide.addText("GRUPO EFX", {
-        x: 0.55, y: 0.24, w: 1.5, h: 0.32,
-        fontSize: 13, fontFace: 'Inter',
-        color: theme.gold, bold: true
-    });
+    // Grupo EFX Logo Image (with fallback to text)
+    if (logoImgData) {
+        if (theme.id === 'dark') {
+            slide.addShape(pres.ShapeType.roundRect, {
+                x: 0.52, y: 0.22, w: 1.36, h: 0.38,
+                fill: { color: 'FFFFFF' },
+                line: { color: '334155', width: 1 },
+                radius: 0.04
+            });
+            slide.addImage({
+                data: logoImgData,
+                x: 0.55, y: 0.24, w: 1.30, h: 0.34,
+                sizing: { type: 'contain', w: 1.30, h: 0.34 }
+            });
+        } else {
+            slide.addImage({
+                data: logoImgData,
+                x: 0.52, y: 0.22, w: 1.36, h: 0.38,
+                sizing: { type: 'contain', w: 1.36, h: 0.38 }
+            });
+        }
+    } else {
+        slide.addText("GRUPO EFX", {
+            x: 0.55, y: 0.24, w: 1.5, h: 0.32,
+            fontSize: 13, fontFace: 'Inter',
+            color: theme.gold, bold: true
+        });
+    }
 
     // Title
     slide.addText(title, {
-        x: 2.1, y: 0.22, w: 5.2, h: 0.36,
-        fontSize: 14, fontFace: 'Inter',
+        x: 2.05, y: 0.22, w: 5.25, h: 0.36,
+        fontSize: 13.5, fontFace: 'Inter',
         color: theme.textPrimary, bold: true
     });
 
@@ -649,6 +712,9 @@ async function generatePowerPointPresentation({ themeId, startMonth, endMonth, i
 
     if (onProgress) onProgress('Coletando e estruturando dados...');
 
+    // Load Grupo EFX Logo
+    const logoImgData = await getLogoDataUrl();
+
     // Extract all unique months available in state.data
     const allMonths = new Set();
     Object.values(state.data).forEach(vehicleData => {
@@ -681,7 +747,7 @@ async function generatePowerPointPresentation({ themeId, startMonth, endMonth, i
         if (onProgress) onProgress('Construindo slide compilado do período...');
         const compiledStats = aggregateDataForMonths(state.data, validMonths);
         const compiledTitle = `Visão Compilada da Frota — ${periodRangeLabel}`;
-        addDashboardSlide(pres, theme, compiledTitle, periodRangeLabel, compiledStats);
+        addDashboardSlide(pres, theme, compiledTitle, periodRangeLabel, compiledStats, logoImgData);
     }
 
     // 2. Subsequent Slides: Monthly in chronological order (if selected)
@@ -691,7 +757,7 @@ async function generatePowerPointPresentation({ themeId, startMonth, endMonth, i
             const monthTitle = `Visão Mensal da Frota — ${formatMonthLabel(monthYm)}`;
             if (onProgress) onProgress(`Construindo slide de ${formatMonthLabel(monthYm)}...`);
             const monthStats = aggregateDataForMonths(state.data, [monthYm]);
-            addDashboardSlide(pres, theme, monthTitle, formatMonthLabel(monthYm), monthStats);
+            addDashboardSlide(pres, theme, monthTitle, formatMonthLabel(monthYm), monthStats, logoImgData);
         }
     }
 
