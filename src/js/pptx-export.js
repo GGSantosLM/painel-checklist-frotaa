@@ -337,32 +337,16 @@ function renderChartToDataUrl(dailyStats, theme) {
     ctx.stroke();
 
     // Find Min and Max points for clean milestone dots
-    let minPoint = points[0];
-    let maxPoint = points[0];
+    // Render signal dots for ALL days/points
+    const dotRadius = points.length > 45 ? 3 : 4.5;
+    const dotLineWidth = points.length > 45 ? 1.5 : 2.5;
+
     points.forEach(p => {
-        if (p.pct < minPoint.pct) minPoint = p;
-        if (p.pct > maxPoint.pct) maxPoint = p;
-    });
-
-    // Milestone points to render dots (Clean, avoid cluttering line of circles)
-    const milestoneSet = new Set();
-    if (points.length <= 15) {
-        points.forEach((_, i) => milestoneSet.add(i));
-    } else {
-        milestoneSet.add(0); // Start
-        milestoneSet.add(points.length - 1); // End
-        milestoneSet.add(minPoint.idx); // Min
-        milestoneSet.add(maxPoint.idx); // Max
-    }
-
-    milestoneSet.forEach(i => {
-        const p = points[i];
-        if (!p) return;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, dotRadius, 0, Math.PI * 2);
         ctx.fillStyle = isDark ? '#0B0F19' : '#FFFFFF';
         ctx.fill();
-        ctx.lineWidth = 3;
+        ctx.lineWidth = dotLineWidth;
         ctx.strokeStyle = lineColor;
         ctx.stroke();
     });
