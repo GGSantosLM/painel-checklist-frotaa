@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="badge-grad" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#4CAF50" />
+      <stop offset="70%" stop-color="#2E7D32" />
+      <stop offset="100%" stop-color="#1B5E20" />
+    </radialGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.35"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+    <filter id="inner-shadow">
+      <feComponentTransfer in="SourceAlpha">
+        <feFuncA type="linear" slope="0.7"/>
+      </feComponentTransfer>
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feOffset dx="0" dy="4"/>
+      <feComposite operator="out" in2="SourceAlpha" result="inverse"/>
+      <feFlood flood-color="#000" flood-opacity="0.4" result="color"/>
+      <feComposite operator="in" in2="inverse" result="shadow"/>
+      <feComposite operator="over" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+
+  <!-- 24-point serrated starburst badge -->
+  <g filter="url(#shadow)">
+    <path d="M 256,30 
+             L 278,54 L 309,42 L 325,70 L 357,67 L 366,98 L 397,104 L 398,136 L 426,150 L 419,181 L 442,201 L 428,230 L 446,256 L 428,282 L 442,311 L 419,331 L 426,362 L 398,376 L 397,408 L 366,414 L 357,445 L 325,442 L 309,470 L 278,458 L 256,482 L 234,458 L 203,470 L 187,442 L 155,445 L 146,414 L 115,408 L 114,376 L 86,362 L 93,331 L 70,311 L 84,282 L 66,256 L 84,230 L 70,201 L 93,181 L 86,150 L 114,136 L 115,104 L 146,98 L 155,67 L 187,70 L 203,42 L 234,54 Z"
+          fill="url(#badge-grad)" 
+          stroke="#1B5E20" 
+          stroke-width="6" 
+          stroke-linejoin="round" />
+  </g>
+
+  <!-- Highlight bevel -->
+  <path d="M 256,44 
+           L 275,65 L 302,54 L 316,79 L 344,76 L 352,103 L 379,108 L 380,136 L 405,148 L 399,175 L 419,193 L 407,218 L 422,241 L 407,264 L 419,289 L 399,307 L 405,334 L 380,346 L 379,374 L 352,379 L 344,406 L 316,403 L 302,428 L 275,417 L 256,438 L 237,417 L 210,428 L 196,403 L 168,406 L 160,379 L 133,374 L 132,346 L 107,334 L 113,307 L 93,289 L 105,264 L 90,241 L 105,218 L 93,193 L 113,175 L 107,148 L 132,136 L 133,108 L 160,103 L 168,76 L 196,79 L 210,54 L 237,65 Z"
+        fill="none" 
+        stroke="#ffffff" 
+        stroke-opacity="0.25" 
+        stroke-width="4" 
+        stroke-linejoin="round" />
+
+  <!-- Bold White Checkmark with Shadow -->
+  <g filter="url(#shadow)">
+    <path d="M 180,250 L 230,315 L 335,185" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="48" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+  </g>
+</svg>
