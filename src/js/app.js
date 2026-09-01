@@ -618,7 +618,7 @@ function computeLatestKm(vehicleDays) {
 function getDriverHistory(vehicleDays) {
     const entries = Object.entries(vehicleDays)
         .sort((a, b) => b[0].localeCompare(a[0])) // reverse chronological
-        .slice(0, 15); // limit to last 15
+        .slice(0, 22); // limit to last 22
     return entries.map(([date, data]) => {
         const [, m, d] = date.split('-');
         return {
@@ -654,7 +654,7 @@ function renderFleetCards() {
         const hasData = Object.keys(filteredDays).length > 0;
         const pct = hasData ? computeVehicleConformity(filteredDays) : null;
         const km = computeLatestKm(filteredDays);
-        const driverHistory = getDriverHistory(filteredDays);
+        const driverHistory = getDriverHistory(vehicleData.days || {});
         const color = pct !== null ? getConformityColor(pct) : 'var(--clr-text-muted)';
 
         const tooltipItems = driverHistory.length > 0
