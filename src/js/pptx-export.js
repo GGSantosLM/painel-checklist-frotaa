@@ -619,7 +619,7 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats, logoImgData)
         });
     } else {
         driversToShow.forEach((drv, i) => {
-            const dy = midY + 0.28 + i * 0.16;
+            const dy = midY + 0.26 + i * 0.15;
             
             // Driver Name (aligned left)
             slide.addText(`${i + 1}. ${drv.name}`, {
