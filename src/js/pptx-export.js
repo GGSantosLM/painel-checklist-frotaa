@@ -610,7 +610,7 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats, logoImgData)
     });
 
     // Driver table list
-    const driversToShow = stats.driverList.slice(0, 5);
+    const driversToShow = stats.driverList.slice(0, 10);
     if (driversToShow.length === 0) {
         slide.addText("Sem registros de condutores", {
             x: engageX + 0.10, y: midY + 0.75, w: engageW - 0.20, h: 0.30,
@@ -619,12 +619,12 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats, logoImgData)
         });
     } else {
         driversToShow.forEach((drv, i) => {
-            const dy = midY + 0.34 + i * 0.29;
+            const dy = midY + 0.28 + i * 0.16;
             
             // Driver Name (aligned left)
             slide.addText(`${i + 1}. ${drv.name}`, {
-                x: engageX + 0.10, y: dy, w: 1.42, h: 0.22,
-                fontSize: 8.5, fontFace: 'Inter',
+                x: engageX + 0.10, y: dy, w: 1.42, h: 0.14,
+                fontSize: 7.5, fontFace: 'Inter',
                 color: theme.textPrimary, bold: false
             });
 
@@ -637,15 +637,15 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats, logoImgData)
             }
 
             slide.addShape(pres.ShapeType.roundRect, {
-                x: engageX + 1.55, y: dy, w: 0.85, h: 0.22,
+                x: engageX + 1.55, y: dy, w: 0.85, h: 0.14,
                 fill: { color: theme.id === 'dark' ? '1E293B' : 'F3F4F6' },
                 line: { color: badgeColor, width: 1 },
-                radius: 0.04
+                radius: 0.03
             });
 
             slide.addText(`${drv.pct}% (${drv.count}d)`, {
-                x: engageX + 1.55, y: dy, w: 0.85, h: 0.22,
-                fontSize: 8, fontFace: 'Inter',
+                x: engageX + 1.55, y: dy, w: 0.85, h: 0.14,
+                fontSize: 7, fontFace: 'Inter',
                 color: badgeColor, bold: true, align: 'center', valign: 'middle'
             });
         });
