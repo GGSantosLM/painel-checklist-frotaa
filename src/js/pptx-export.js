@@ -662,7 +662,7 @@ function addDashboardSlide(pres, theme, title, subtitleDate, stats, logoImgData)
         radius: 0.06
     });
 
-    slide.addText("Análise Executiva IA — Diagnóstico de Operação e Engajamento", {
+    slide.addText("Análise Executiva — Diagnóstico de Operação e Engajamento", {
         x: 0.55, y: botY + 0.06, w: 8.9, h: 0.18,
         fontSize: 9.5, fontFace: 'Inter',
         color: theme.gold, bold: true
